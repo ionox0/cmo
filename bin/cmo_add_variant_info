@@ -2,7 +2,7 @@
 
 import sys, os
 import csv, argparse
-from itertools import izip
+
 
 def cvtChrom(x):
     if x.isdigit():
@@ -61,10 +61,10 @@ def main(original_maf_file, impact410File, seqDataFile, output_file):
             elif r["Reference_Allele"]!=r["Tumor_Seq_Allele2"]:
                 alt=r["Tumor_Seq_Allele2"]
             else:
-                print >>sys.stderr, "Should never get here"
-                print >>sys.stderr
-                print >>sys.stderr, r
-                print >>sys.stderr
+                print("Should never get here", file=sys.stderr)
+                print(file=sys.stderr)
+                print(r, file=sys.stderr)
+                print(file=sys.stderr)
                 sys.exit()
             chrom=r["Chromosome"]
             if chrom.startswith("chr"):
@@ -84,7 +84,7 @@ def main(original_maf_file, impact410File, seqDataFile, output_file):
                 r["IMPACT_410"]="T" if pos in impact410 else "F"
 
             if r["t_depth"]=="":
-                print >>sys.stderr, label
+                print(label, file=sys.stderr)
                 r["t_depth"]=str(int(r["t_alt_count"])+int(r["t_ref_count"]))
             r["t_var_freq"]=float(r["t_alt_count"])/float(r["t_depth"])
 
@@ -100,14 +100,14 @@ def main(original_maf_file, impact410File, seqDataFile, output_file):
 
 
             events[label]=r
-            print label
+            print(label)
     if not impact410File: 
         outFields=cin.fieldnames+["POS","TAG","LABEL","TriNuc","t_var_freq","n_var_freq"]
     else:
         outFields=cin.fieldnames+["POS","TAG","LABEL","TriNuc","IMPACT_410","t_var_freq","n_var_freq"]
     cout=csv.DictWriter(outfh,outFields,delimiter="\t")
 
-    print commentHeader
+    print(commentHeader)
 
 #    import annotateMAF
 #    annotateMAF.printAnnotation()

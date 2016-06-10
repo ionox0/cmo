@@ -10,27 +10,27 @@ __version__ = '%s'
 
 def update_version_py():
     if not os.path.isdir(".git"):
-        print "This does not appear to be a Git repository."
+        print("This does not appear to be a Git repository.")
         return
     try:
         p = subprocess.Popen(["git", "describe",
         "--tags", "--dirty", "--always"],
         stdout=subprocess.PIPE)
     except EnvironmentError:
-        print "unable to run git, leaving cmo/_version.py alone"
+        print("unable to run git, leaving cmo/_version.py alone")
         return
     stdout = p.communicate()[0]
     if p.returncode != 0:
-        print "unable to run git, leaving cmo/_version.py alone"
+        print("unable to run git, leaving cmo/_version.py alone")
         return
     ver = stdout.strip()
     if ver.find("-dirty") > -1:
-        print >>sys.stderr,  "REFUSING TO INSTALL DIRTY TREE! COMMIT TO TRUNK OR BRANCH!"
+        print("REFUSING TO INSTALL DIRTY TREE! COMMIT TO TRUNK OR BRANCH!", file=sys.stderr)
         #sys.exit(1)
     f = open("cmo/_version.py", "w")
     f.write(VERSION_PY % ver)
     f.close()
-    print "set cmo/_version.py to '%s'" % ver
+    print("set cmo/_version.py to '%s'" % ver)
 
 def get_version():
     try:

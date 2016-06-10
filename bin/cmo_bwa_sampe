@@ -11,16 +11,16 @@ def parse_bwa_help(bwa_cmd):
 if __name__ =='__main__':
     parser = argparse.ArgumentParser(description="run bwa sampe- the thingy that calculates best alignment pairs after bwa aln")
     args_dict = parse_bwa_help(cmo.util.programs['bwa']['default'] + " sampe")
-    parser.add_argument("--genome", choices=cmo.util.genomes.keys(), required=True)
+    parser.add_argument("--genome", choices=list(cmo.util.genomes.keys()), required=True)
     parser.add_argument("--fastq1", required=True)
     parser.add_argument("--sai1", required=True)
     parser.add_argument("--sai2", required=True)
     parser.add_argument("--fastq2", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--sam", default=False)
-    parser.add_argument("--version", required=True, choices=cmo.util.programs['bwa'].keys())
+    parser.add_argument("--version", required=True, choices=list(cmo.util.programs['bwa'].keys()))
     args_dict = parse_bwa_help(cmo.util.programs['bwa']['default'] + " sampe")
-    for arg, description in args_dict.items():
+    for arg, description in list(args_dict.items()):
         parser.add_argument(arg, dest=arg[1:],action="store", help=description)
     args = parser.parse_args()
     fasta = cmo.util.genomes[args.genome]['fasta']
@@ -35,6 +35,6 @@ if __name__ =='__main__':
     for key in ["genome", "fastq1", "fastq2", "sai1", "sai2", "output", "sam", "version"]:
         del args_dict[key]
     parser.parse_args()
-    print bwa_helper.sampe(fasta, sai1, sai2, fastq1, fastq2, output, args_dict, no_bam=sam)
+    print(bwa_helper.sampe(fasta, sai1, sai2, fastq1, fastq2, output, args_dict, no_bam=sam))
 
 

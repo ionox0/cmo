@@ -16,12 +16,12 @@ def cleanup():
 
 def facets_file_job(pipeline_dir, output_file):
     ff_cmd = ['cmo_make_facets_file', '--output-file', output_file, '--pipeline-dir', pipeline_dir]
-    print >>sys.stderr ," ".join(ff_cmd)
+    print(" ".join(ff_cmd), file=sys.stderr)
     return workflow.Job(" ".join(ff_cmd), name="Make Facets Data File")
 
 def maf_anno_job(facets_file, input_maf, output_maf):
     ma_cmd = ['cmo_facets', 'mafAnno', '-m', input_maf, '-f', facets_file, '-o', output_maf]
-    print >>sys.stderr, " ".join(ma_cmd)
+    print(" ".join(ma_cmd), file=sys.stderr)
     return workflow.Job(" ".join(ma_cmd), name="Annotate MAF with Facets")
 
 
@@ -29,17 +29,17 @@ def maf_anno_job(facets_file, input_maf, output_maf):
 def filter_hap_job(input, pairing_file, output_filename, temp_dir):
     #FIXME TEMP DIRECTORY?!?!?!?
     haplo_cmd = ["cmo_filter_haplotype", "--pairing-file", pairing_file, "--haplotype-vcf", input, "--output-file", output_filename, "--temp-dir", temp_dir]
-    print >>sys.stderr, " ".join(haplo_cmd)
+    print(" ".join(haplo_cmd), file=sys.stderr)
     return workflow.Job(" ".join(haplo_cmd),name="Filt.Haplotype")
 
 def filter_mutect_job(input, pairing_file, output_filename, temp_dir):
     cmd = ["cmo_filter_mutect", "--pairing-file", pairing_file, "--mutect-vcf", os.path.abspath(input), "--output-file", output_filename, '--temp-dir', temp_dir ]
-    print >>sys.stderr, " ".join(cmd)
+    print(" ".join(cmd), file=sys.stderr)
     return (workflow.Job(" ".join(cmd), name="Filt.Mutect"))
 
 def merged_maf_job(maf_inputs, merged_maf_name):
     merge_mafs_cmd = ["cmo_merge_mafs", " ".join(maf_inputs), "--output-file", merged_maf_name]
-    print >>sys.stderr, " ".join(merge_mafs_cmd)
+    print(" ".join(merge_mafs_cmd), file=sys.stderr)
     return workflow.Job(" ".join(merge_mafs_cmd), name="Merge Mafs")
 
 def trinuc_and_impact_job(merged_maf_name, seq_output, impact_output):
@@ -47,7 +47,7 @@ def trinuc_and_impact_job(merged_maf_name, seq_output, impact_output):
             "--genome", "hg19", 
             "--output-seq", seq_output, 
             "--output-impact", impact_output]
-    print >>sys.stderr, " ".join(trinuc_cmd)
+    print(" ".join(trinuc_cmd), file=sys.stderr)
     return workflow.Job(" ".join(trinuc_cmd), name="Trinuc and Impact")
 
 def maf2maf(merged_maf_name, output_file):
@@ -60,7 +60,7 @@ def maf2maf(merged_maf_name, output_file):
             '--input-maf', merged_maf_name,
             '--output-maf', output_file
             ]
-    print >>sys.stderr, " ".join(maf2maf_cmd)
+    print(" ".join(maf2maf_cmd), file=sys.stderr)
     return workflow.Job(" ".join(maf2maf_cmd), name="maf2maf")
 
 def add_variant_info(seq_input, impact_pos_input, orig_maf, output_file):
@@ -79,18 +79,18 @@ def main(pairing_file, pipeline_output_dir, project_id, output_dir, workflow_mod
         os.makedirs(output_dir)
     haplotype_vcf_pattern = os.path.join(pipeline_output_dir, "variants",  "haplotypecaller", "*_HaplotypeCaller.vcf")
     if not project_id:
-        print pipeline_output_dir
+        print(pipeline_output_dir)
         m = re.search("(Proj_\d+(?:_\S)?)", pipeline_output_dir)
         if not m:
-            print >>sys.stderr, "Unable to find a PROJ_[NUMBER]_[A-Z] string in pipeline dir name"
-            print >>sys.stderr, "Supply a PROJECT ID at command line to run with this dir."
-            print >>sys.stderr, "Bailing out!"
+            print("Unable to find a PROJ_[NUMBER]_[A-Z] string in pipeline dir name", file=sys.stderr)
+            print("Supply a PROJECT ID at command line to run with this dir.", file=sys.stderr)
+            print("Bailing out!", file=sys.stderr)
             sys.exit(1)
         project_id = m.group(1)
     try:
         haplotype_vcf = glob.glob(haplotype_vcf_pattern)[0]
     except:
-        print >>sys.stderr, "No Haplotype VCF found with %s glob pattern" % haplotype_vcf_pattern
+        print("No Haplotype VCF found with %s glob pattern" % haplotype_vcf_pattern, file=sys.stderr)
     ##########MAKE JOBS#############################
     ####HAPMAF OUTPUT NAME
     hapmaf_filename = project_id + "___qSomHC_InDels__TCGA_MAF.txt"
@@ -140,7 +140,7 @@ def main(pairing_file, pipeline_output_dir, project_id, output_dir, workflow_mod
     if not args.no_facets:
         terminal_facets_jobs = []
         if not cmoflow_facets:
-            print >>sys.stderr, "facets not installed, can't run facets- bailing out"
+            print("facets not installed, can't run facets- bailing out", file=sys.stderr)
             sys.exit(1)
         else:
             facets = imp.load_source("facets", cmoflow_facets)
@@ -153,15 +153,15 @@ def main(pairing_file, pipeline_output_dir, project_id, output_dir, workflow_mod
                 normal_bam =find_bam(normal_id, pipeline_output_dir)
                 tumor_bam = find_bam(tumor_id, pipeline_output_dir)
                 if not tumor_bam:
-                    print >>sys.stderr, "SKIPPING FACETS FOR %s, bam not found" % tumor_id
+                    print("SKIPPING FACETS FOR %s, bam not found" % tumor_id, file=sys.stderr)
                     continue
                 if not normal_bam: 
-                    print >>sys.stderr, "SKIPPING FACETS FOR %s, bam not found" % normal_id
+                    print("SKIPPING FACETS FOR %s, bam not found" % normal_id, file=sys.stderr)
                     continue
                 output_for_facets = os.path.join(output_dir, tumor_id + "__" + normal_id)
                 if not os.path.exists(output_for_facets):
                     os.makedirs(output_for_facets)
-                print >>sys.stderr, "Adding facets workflow for tumor %s, normal %s, dir %s" % (tumor_id, normal_id, output_for_facets)
+                print("Adding facets workflow for tumor %s, normal %s, dir %s" % (tumor_id, normal_id, output_for_facets), file=sys.stderr)
                 (jobs, deps, name,terminal_job) = facets.construct_workflow(normal_bam, tumor_bam, None, None,output_for_facets)
                 all_jobs = all_jobs + jobs
                 job_deps.update(deps)
@@ -206,7 +206,7 @@ if __name__=='__main__':
     parser.add_argument("--no-facets", action='store_true', help="don't add facets jobs too")
     args = parser.parse_args()
     TEMP_DIR = tempfile.mkdtemp(prefix=args.temp_dir)
-    print >>sys.stderr, "using %s for temp directory" % TEMP_DIR
+    print("using %s for temp directory" % TEMP_DIR, file=sys.stderr)
     if args.keep_temp:
         KEEP_TEMP=True
     main(args.pairing_file, args.pipeline_output_dir, args.project_id, args.output_dir, args.workflow_mode, TEMP_DIR)

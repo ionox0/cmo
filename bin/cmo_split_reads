@@ -11,7 +11,7 @@ if __name__ =='__main__':
     args = parser.parse_args()
     args.num_pieces = args.num_pieces.replace(".0", "")
     num_reads_cmd = ["cat", args.file, "|", "wc -l", "|", "cut -f 1"]
-    print " ".join(num_reads_cmd)
+    print(" ".join(num_reads_cmd))
     num_lines = subprocess.check_output(" ".join(num_reads_cmd), shell=True)
     lines_per_chunk = math.ceil(float(num_lines) / int(args.num_pieces))
     while lines_per_chunk % 4 != 0:

@@ -51,7 +51,7 @@ def find_sub_commands(path):
 if __name__ =='__main__':
     #partially parse options to get versin/subcommand and add more options
     verparser = argparse.ArgumentParser(description="run bedtools", add_help=False)
-    verparser.add_argument("--version", choices=cmo.util.programs['bedtools'].keys(), default="default")
+    verparser.add_argument("--version", choices=list(cmo.util.programs['bedtools'].keys()), default="default")
     options, _ = verparser.parse_known_args()
     preparser = argparse.ArgumentParser(parents=[verparser], add_help=False)
     preparser.add_argument("--cmd", required=True, choices=find_sub_commands(cmo.util.programs['bedtools'][options.version]), metavar='BEDTOOLS COMMAND')
@@ -62,10 +62,10 @@ if __name__ =='__main__':
     parser = argparse.ArgumentParser(parents= [ preparser ], add_help=True, 
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     group = parser.add_argument_group(selection.cmd)
-    for arg, help in sub_command_options.items():
+    for arg, help in list(sub_command_options.items()):
         help = help.replace("%","%%")
         if(arg =="-fi"):
-            group.add_argument(arg, action="store", choices=cmo.util.genomes.keys())
+            group.add_argument(arg, action="store", choices=list(cmo.util.genomes.keys()))
         #FIXME: parsing this shit kind of sucks, this is a bandaid.
         elif arg in ["-tab"]:
             group.add_argument(arg, action="store_true", help=help) 
@@ -88,10 +88,10 @@ if __name__ =='__main__':
         command_specific_args['fi']=cmo.util.genomes[args.fi]['fasta']
     for key in  ["version", "cmd"]:
         del command_specific_args[key]
-    command_specific_args = dict((k, v) for k, v in command_specific_args.iteritems() if v)
+    command_specific_args = dict((k, v) for k, v in command_specific_args.items() if v)
     cmd = [bedtools_command]
     stdin=None
-    for option, value in command_specific_args.items():
+    for option, value in list(command_specific_args.items()):
         if isinstance(value, list):
             cmd = cmd + ["-"+option] + value
             #bedtools edge case read from stdin

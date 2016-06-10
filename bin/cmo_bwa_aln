@@ -10,12 +10,12 @@ def parse_bwa_help(bwa_cmd):
 
 if __name__ =='__main__':
     parser = argparse.ArgumentParser(description="run bwa aln")
-    parser.add_argument("--genome", choices=cmo.util.genomes.keys(), required=True)
+    parser.add_argument("--genome", choices=list(cmo.util.genomes.keys()), required=True)
     parser.add_argument("--fastq", required=True)
     parser.add_argument("--output", required=True)
-    parser.add_argument("--version", required=True, choices=cmo.util.programs['bwa'].keys())
+    parser.add_argument("--version", required=True, choices=list(cmo.util.programs['bwa'].keys()))
     args_dict = parse_bwa_help(cmo.util.programs['bwa']['default'] + " aln")
-    for arg, description in args_dict.items():
+    for arg, description in list(args_dict.items()):
         parser.add_argument(arg, dest=arg[1:],action="store", help=description)
     args = parser.parse_args()
     fasta = cmo.util.genomes[args.genome]['fasta']
@@ -26,6 +26,6 @@ if __name__ =='__main__':
     args_dict.pop("genome")
     args_dict.pop("fastq")
     args_dict.pop("output")
-    print bwa_helper.aln(fasta, fastq, output, args_dict)
+    print(bwa_helper.aln(fasta, fastq, output, args_dict))
 
 

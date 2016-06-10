@@ -11,13 +11,13 @@ class Gatk:
                 self.gatk_jar=util.programs["mutect"][version]
             else:
                 self.gatk_jar=util.programs["gatk"][version]
-        except KeyError, e:
-            print >>sys.stderr, "Cannot find specified version of piard in configuration file: %s" % version
+        except KeyError as e:
+            print("Cannot find specified version of piard in configuration file: %s" % version, file=sys.stderr)
             sys.exit(1)
         try: 
             self.java_cmd=util.programs["java"][version]
-        except KeyError, e:
-            print >>sys.stderr, "Cannot find specified version of java to run gatk with: %s" % version
+        except KeyError as e:
+            print("Cannot find specified version of java to run gatk with: %s" % version, file=sys.stderr)
             sys.exit(1)
         self.temp_dir=None
         if temp_dir:
@@ -28,7 +28,7 @@ class Gatk:
         if(self.temp_dir != None):
             cmd = cmd +  ["-Djava.io.tmpdir="+self.temp_dir]
         cmd = cmd + [ "-jar", self.gatk_jar, "-T",command]
-        for arg, value in command_specific_args.items():
+        for arg, value in list(command_specific_args.items()):
             if value != None:
                 if isinstance(value, list):
                     for val in value:

@@ -12,12 +12,12 @@ def parse_script_help(script_path):
 if __name__ =='__main__':
     # We'll first need to figure out which version to run with "-h" to parse the help text
     preparser = argparse.ArgumentParser(description="run maf2vcf", add_help=False)
-    preparser.add_argument("--version", choices=cmo.util.programs['vcf2maf'].keys(), default="default")
+    preparser.add_argument("--version", choices=list(cmo.util.programs['vcf2maf'].keys()), default="default")
     options, _ = preparser.parse_known_args()
     script_path = cmo.util.programs['vcf2maf'][options.version] + "maf2vcf.pl"
     args_dict = parse_script_help(script_path)
     parser = argparse.ArgumentParser(parents = [preparser], add_help=True)
-    for arg, description in args_dict.items():
+    for arg, description in list(args_dict.items()):
         if arg == "--help":
             continue
         parser.add_argument(arg,action="store", metavar='', help=description)
@@ -29,9 +29,9 @@ if __name__ =='__main__':
     cmd = [cmo.util.programs['perl']['default'], script_path]
     stderr = args.stderr
     stdout = args.stdout
-    args_dict = dict((k, v) for k, v in args_dict.iteritems() if v)
+    args_dict = dict((k, v) for k, v in args_dict.items() if v)
     cmo.util.remove_logging_options_from_dict(args_dict)
-    for arg, value in args_dict.items():
+    for arg, value in list(args_dict.items()):
         arg = arg.replace("_","-")
         cmd = cmd + ["--"+arg, value]
     cmo.util.call_cmd(" ".join(cmd), stdout=stdout, stderr=stderr)

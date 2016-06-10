@@ -15,8 +15,8 @@ This method adds custom arguments to run the wrapper
 def makepreparser():
     # Creating First Arguments that are specific to the wrapper
     preparser = argparse.ArgumentParser(description="run abra", add_help=False)
-    preparser.add_argument("--version", choices=cmo.util.programs['abra'].keys(), default="default")
-    preparser.add_argument("--java-version", choices=cmo.util.programs['java'].keys(), default="default")
+    preparser.add_argument("--version", choices=list(cmo.util.programs['abra'].keys()), default="default")
+    preparser.add_argument("--java-version", choices=list(cmo.util.programs['java'].keys()), default="default")
     # Parse the wrapper arguments
     options, _ = preparser.parse_known_args()
     # Store them as variables
@@ -71,9 +71,9 @@ It will update how the arguments get stored for Flags
 
 
 def process_options(parser, cmd_options):
-    for arg, help in cmd_options.items():
+    for arg, help in list(cmd_options.items()):
         if (arg == "--ref"):
-            parser.add_argument("--ref", "--reference_sequence", required=True, choices=cmo.util.genomes.keys())
+            parser.add_argument("--ref", "--reference_sequence", required=True, choices=list(cmo.util.genomes.keys()))
         elif (arg == "--in"):
             parser.add_argument(arg, required=True, help=help)
         elif (arg == "--out"):
@@ -101,7 +101,7 @@ def convert_default_variables(parser):
     if not args.targets:
         args.targets = cmo.util.targets['abra'][args.ref]
     command_specific_args = vars(args)
-    command_specific_args = dict((k, v) for k, v in command_specific_args.iteritems() if v)
+    command_specific_args = dict((k, v) for k, v in command_specific_args.items() if v)
     command_specific_args['ref'] = cmo.util.genomes[args.ref]['fasta']
     return (args, command_specific_args)
 
@@ -125,7 +125,7 @@ This method makes the final command as a list and returns the list
 
 def make_command_to_run(java, abra_jar, command_specific_args):
     cmd = [java, "-jar", abra_jar]
-    for option, value in command_specific_args.items():
+    for option, value in list(command_specific_args.items()):
         option = option.replace("_","-")
         if value == True:
             cmd = cmd + ["--" + option]
@@ -153,14 +153,14 @@ def main():
     # Make the command that needs to be launched
     # To get the time
     start_time = time.time()
-    print "Start Time:", time.ctime(start_time)
+    print("Start Time:", time.ctime(start_time))
     java = java + " -Djava.io.tmpdir=/scratch/" + str(os.getpid())
     cmd = make_command_to_run(java, abra_jar, command_specific_args)
-    print " ".join(cmd)
+    print(" ".join(cmd))
     cmo.util.call_cmd(" ".join(cmd), shell=True)
     end_time = time.time()
-    print "End Time:", time.ctime(end_time)
-    print("Elapsed time was %g seconds" % (end_time - start_time))
+    print("End Time:", time.ctime(end_time))
+    print(("Elapsed time was %g seconds" % (end_time - start_time)))
 
 
 '''

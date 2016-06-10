@@ -16,7 +16,7 @@ def main(qc_version, r_version, metrics_dir, pre):
             '"',
             script
             ]
-    print " ".join(cmd)
+    print(" ".join(cmd))
     cmo.util.call_cmd(" ".join(cmd))
 
 
@@ -24,7 +24,7 @@ def main(qc_version, r_version, metrics_dir, pre):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Do Dat PostProcessing")
     parser.add_argument("--qc-version", default="default", help="destination of filtered output")
-    parser.add_argument("--R-version", default="3.1.2", choices=cmo.util.programs['R'].keys(),help="Run QC PDF generation")
+    parser.add_argument("--R-version", default="3.1.2", choices=list(cmo.util.programs['R'].keys()),help="Run QC PDF generation")
     parser.add_argument("--pre", default="Project", help="project prefix")
     parser.add_argument("--metrics-directory", required=True, help="pipeline generated metrics directory")
     args = parser.parse_args()

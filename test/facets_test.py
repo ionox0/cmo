@@ -14,7 +14,7 @@ test_inputs = {"tumor_bam":"Chr22_hg19_TCGA-A8-A094-01A-11W-A019-09.tumor.bam",
                'cncf_file':'H_LS-A8-A094-01A-11W-A019-09-1__H_LS-A8-A094-10A-01W-A021-09-1.cncf.txt'
                }
 
-for key, value in test_inputs.items():
+for key, value in list(test_inputs.items()):
     test_inputs[key]=os.path.join(TEST_DATA_DIR, "inputs", value)
 
 expected_outputs = {"tumor_basecounts":"H_LS-A8-A094-01A-11W-A019-09-1.dat.gz",
@@ -25,7 +25,7 @@ expected_outputs = {"tumor_basecounts":"H_LS-A8-A094-01A-11W-A019-09-1.dat.gz",
                     'arm_level_calls':"facets_arm_level_calls.txt"
                     }
 
-for key, value in expected_outputs.items():
+for key, value in list(expected_outputs.items()):
     expected_outputs[key]=os.path.join(TEST_DATA_DIR, "expected_outputs", value)
 
 
@@ -119,7 +119,7 @@ def test_facets_maf():
                   "-m", input_maf,
                   "-f", input_rdata_pairing,
                   "-o", os.path.join(TEST_TEMP_DIR, "TCGA-A8-A094-01A-11W-A019-09.ann.maf")]
-    print " ".join(facets_cmd)
+    print(" ".join(facets_cmd))
     rv = subprocess.call(facets_cmd)
     assert rv==0, "facets failed to run :("
     expected_annmaf_output = expected_outputs['ann_maf']
@@ -137,7 +137,7 @@ def test_facets_gene_call():
                   "-f", cncf_input,
                   "-o",
                   test_seg_output]
-    print " ".join(facets_cmd)
+    print(" ".join(facets_cmd))
     rv = subprocess.call(facets_cmd)
     assert rv==0, "facets failed to run :(, exit code %s" % rv
     expected_seg_output = expected_outputs['gene_level_calls']
@@ -154,7 +154,7 @@ def test_facets_arm_call():
                   "-f", cncf_input,
                   "-o",
                   test_seg_output]
-    print " ".join(facets_cmd)
+    print(" ".join(facets_cmd))
     rv = subprocess.call(facets_cmd)
     assert rv==0, "facets failed to run :(, exit code %s" % rv
     expected_seg_output = expected_outputs['arm_level_calls']

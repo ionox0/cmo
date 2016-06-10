@@ -17,23 +17,23 @@ def find_sub_command_options(picard_helper, sub_command):
 if __name__ =='__main__':
     #partially parse options to get versin/subcommand and add more options
     preparser = argparse.ArgumentParser(description="run picard", add_help=False)
-    preparser.add_argument("--version", choices=cmo.util.programs['picard'].keys(), default="default")
-    preparser.add_argument("--java-version", choices=cmo.util.programs['java'].keys(), default="default")
+    preparser.add_argument("--version", choices=list(cmo.util.programs['picard'].keys()), default="default")
+    preparser.add_argument("--java-version", choices=list(cmo.util.programs['java'].keys()), default="default")
     preparser.add_argument("--cmd", required=True)
     options, _ = preparser.parse_known_args()
     #time for monkey business
     picard_helper = cmo.picard.Picard(java_version=options.version, version=options.version)
     (sub_command_options, error_msg) = find_sub_command_options(picard_helper, options.cmd)
     if sub_command_options == None:
-        print >>sys.stderr, error_msg
+        print(error_msg, file=sys.stderr)
         sys.exit(1)
     #ok it was a valid subcommand, add the options we found and the genome option
     parser = argparse.ArgumentParser(parents= [ preparser ] , add_help= True,
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    for arg, help in sub_command_options.items():
+    for arg, help in list(sub_command_options.items()):
         help = help.replace("%","%%")
         if(arg == "R"):
-           parser.add_argument("--R","--genome", required=True, choices=cmo.util.genomes.keys())
+           parser.add_argument("--R","--genome", required=True, choices=list(cmo.util.genomes.keys()))
            continue
         if(arg =="LEVEL" or arg=="I"):
             parser.add_argument("--" + arg, action="append")

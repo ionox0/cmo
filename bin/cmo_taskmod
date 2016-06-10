@@ -4,7 +4,7 @@ import argparse, os, sys, subprocess
 import cmo
 from fireworks.scripts.lpad_run import *
 import getpass
-from cStringIO import StringIO
+from io import StringIO
 
 LPAD_CONFIG_LOC = "/opt/common/CentOS_6-dev/cmo/fireworks_config_files/"
 
@@ -27,7 +27,7 @@ if __name__ =='__main__':
         user = getpass.getuser()
     fireworks_db = os.path.join(LPAD_CONFIG_LOC, user + ".yaml")
     if not os.path.exists(fireworks_db):
-        print >>sys.stderr, "Can't find db file for user %s" % user
+        print("Can't find db file for user %s" % user, file=sys.stderr)
         sys.exit(1)
     args.launchpad_file = fireworks_db
     args.name = None
@@ -42,7 +42,7 @@ if __name__ =='__main__':
     with Capturing() as output:
         get_fws(args)
     output = json.loads("".join(output))
-    print output['spec']['_tasks'][0]['script'][0]
+    print(output['spec']['_tasks'][0]['script'][0])
 
 
 

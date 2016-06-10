@@ -40,15 +40,15 @@ def find_sub_command_options(gatk_helper, sub_command):
 if __name__ =='__main__':
     #partially parse options to get versin/subcommand and add more options
     preparser = argparse.ArgumentParser(description="run gatk", add_help=False)
-    preparser.add_argument("--version", choices=cmo.util.programs['gatk'].keys(), default="default")
-    preparser.add_argument("--java-version", choices=cmo.util.programs['java'].keys(), default="default")
+    preparser.add_argument("--version", choices=list(cmo.util.programs['gatk'].keys()), default="default")
+    preparser.add_argument("--java-version", choices=list(cmo.util.programs['java'].keys()), default="default")
     preparser.add_argument("-T", "--cmd", required=True)
     options, _ = preparser.parse_known_args()
     #time for monkey business
     gatk_helper = cmo.gatk.Gatk(java_version=options.version, version=options.version)
     (sub_command_options, error_msg) = find_sub_command_options(gatk_helper, options.cmd)
     if sub_command_options == None:
-        print >>sys.stderr, error_msg
+        print(error_msg, file=sys.stderr)
         sys.exit(1)
     #ok it was a valid subcommand, add the options we found and the genome option
     parser = argparse.ArgumentParser(parents= [ preparser ] , add_help= True, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -59,7 +59,7 @@ if __name__ =='__main__':
         for (arg, long_arg, param, help) in sub_command_options[group]:
             #we want to add our ref seqs ourselves
             if(arg == "-R"):
-                parser_group.add_argument("-R", "--reference_sequence", choices=cmo.util.genomes.keys())
+                parser_group.add_argument("-R", "--reference_sequence", choices=list(cmo.util.genomes.keys()))
                 continue
             #we want to not add this, argparse will
             if(arg == "-h" or arg =="-T" or arg=="-version"):
@@ -79,8 +79,8 @@ if __name__ =='__main__':
     #hack to get vqsr to run with the weird colon arguments, but must be improved if it would also support weird arguments without a value 
     #e.g. ---resource::shitballs with no trailing value would braek this, still
     if len(unknowns) > 0:
-        print >>sys.stderr, "WARNING: INCLUDING UNKNOWN ARGUMENTS (DID YOU TYPO, OR IS THIS A WEIRD COLON ARGUMENT THAT GATK SUCKS FOR HAVING?"
-        print >>sys.stderr, " ".join(unknowns)
+        print("WARNING: INCLUDING UNKNOWN ARGUMENTS (DID YOU TYPO, OR IS THIS A WEIRD COLON ARGUMENT THAT GATK SUCKS FOR HAVING?", file=sys.stderr)
+        print(" ".join(unknowns), file=sys.stderr)
     unknowns_dict = dict()
     for i in range(0, len(unknowns), 2):
         unknowns_dict[re.sub("^--?", "", unknowns[i])]=unknowns[i+1]
@@ -89,11 +89,11 @@ if __name__ =='__main__':
     if args.java_temp:
         gatk_helper.temp_dir = java_temp
     command_specific_args = vars(args)
-    if len(unknowns_dict.keys()) > 0:
+    if len(list(unknowns_dict.keys())) > 0:
         command_specific_args.update(unknowns_dict)
     if(args.reference_sequence):
         command_specific_args['reference_sequence']=cmo.util.genomes[args.reference_sequence]['fasta']
-    command_specific_args = dict((k, v) for k, v in command_specific_args.iteritems() if v)
+    command_specific_args = dict((k, v) for k, v in command_specific_args.items() if v)
     for key in  ["version", "java_version", "cmd", "java_args", "java_temp"]:
         if key in command_specific_args:
             del command_specific_args[key]

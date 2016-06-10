@@ -19,7 +19,7 @@ class Job(fireworks.Firework):
             if key in kwargs:
                 bsub_options_dict[key]=kwargs[key]
         spec = {}
-        if len(bsub_options_dict.keys()) > 0:
+        if len(list(bsub_options_dict.keys())) > 0:
             spec['_queueadapter']=bsub_options_dict
      #   spec['_dupefinder']={"_fw_name" : "DupeFinderScript"}
         if 'name' in kwargs:
@@ -41,7 +41,7 @@ class Workflow():
         self.db = db
         # Make sure the user has rlaunch in their PATH
         if self.which('rlaunch') is None:
-            print >>sys.stderr, "Can't find rlaunch in $PATH. Please see readme to set $PATH correctly"
+            print("Can't find rlaunch in $PATH. Please see readme to set $PATH correctly", file=sys.stderr)
             sys.exit(1)
         self.launchpad = fireworks.LaunchPad.from_file(db.find_lpad_config())
     def run(self, processing_mode, daemon_log=None):
@@ -100,7 +100,7 @@ class Workflow():
             os.makedirs(job_launch_dir)
             job.spec['_launch_dir']=job_launch_dir
     def cleanup_daemon(self):
-            print >>sys.stderr, "Cleaning up Daemon record..."
+            print("Cleaning up Daemon record...", file=sys.stderr)
             daemons = self.db.client.daemons
             daemons.daemons.remove({"user":getpass.getuser()})
     def watcher_daemon(self, log_file):
@@ -111,7 +111,7 @@ class Workflow():
                 log = open(log_file, "w")
             except:
                 log = log_file #hope its a filehandle instead!
-        print >>sys.stderr ,"Log file opened!"
+        print("Log file opened!", file=sys.stderr)
         #about to fork a process, throw away all handlers.
         #fireworks will create a new queue log handler to write to test with
         #lil hacky but who cares right now
@@ -120,13 +120,13 @@ class Workflow():
         old_sys_stdout = sys.stdout
         self.db.client.close()
         self.launchpad.connection.close()
-        print >>sys.stderr, "Connections closed, preparing to fork..."
+        print("Connections closed, preparing to fork...", file=sys.stderr)
         with daemon.DaemonContext( stdout=log, stderr=log):
             logging.handlers=[]
             dbm = DatabaseManager()
             self.db = dbm
             #reconnect to mongo after fork
-            print dbm.find_lpad_config()
+            print(dbm.find_lpad_config())
             self.launchpad=fireworks.LaunchPad.from_file(dbm.find_lpad_config())
             self.qadapter=dbm.find_qadapter()
             #add our pid as a running process so new daemons don't get started
@@ -137,7 +137,7 @@ class Workflow():
             running_daemons = db.daemons.find({"user":getpass.getuser()}).count()
             if running_daemons >0:
             #todo, check pid is alive
-                print >>old_sys_stdout, "Not Forking Daemon- daemon process found"
+                print("Not Forking Daemon- daemon process found", file=old_sys_stdout)
             #don't start daemon
                 sys.exit(0)
             atexit.register(self.cleanup_daemon)
@@ -182,11 +182,11 @@ class Workflow():
             old_jobs[job]=i
         ofh.write(yaml.safe_dump(job_list, default_flow_style=False))
         links = { 'links': dict()}
-        for (key, value) in self.job_dependencies.items():
+        for (key, value) in list(self.job_dependencies.items()):
             if isinstance(value, list):
                 links['links'][old_jobs[key]]=list()
                 for item in value:
-                    print key, item
+                    print(key, item)
                     links['links'][old_jobs[key]].append(old_jobs[item])
             else:
                 links['links'][old_jobs[key]]=list()
@@ -209,7 +209,7 @@ class DatabaseManager():
         lpad_file = os.path.join(FW_LPAD_CONFIG_LOC, self.lpad_cfg_filename())
         if not os.path.exists(lpad_file):
             self.create_lpad_config()
-        print >>sys.stderr, "Using %s launchpad config" % lpad_file
+        print("Using %s launchpad config" % lpad_file, file=sys.stderr)
         return lpad_file
     def find_qadapter(self):
         qadapt_file = os.path.join(FW_LPAD_CONFIG_LOC, self.qadapt_cfg_filename())
@@ -230,19 +230,19 @@ class DatabaseManager():
                 "pre_rocket" : "null",
                 "post_rocket" : "null"
                 }
-        for key,value in yaml_dict.items():
-            print >>sys.stderr, "Qadapt: %s: %s" %(key, value)
+        for key,value in list(yaml_dict.items()):
+            print("Qadapt: %s: %s" %(key, value), file=sys.stderr)
             fh.write(key + ": " + value + "\n")
         fh.close()
 
     def create_lpad_config(self):
         # Make sure the user didn't bsub/qsub the cmoflow command that led us here
         if 'LSB_JOBID' in os.environ or 'PBS_JOBID' in os.environ or 'JOB_ID' in os.environ:
-            print >>sys.stderr, "Please run cmoflow commands in an interactive shell. Don't bsub/qsub them!"
+            print("Please run cmoflow commands in an interactive shell. Don't bsub/qsub them!", file=sys.stderr)
             sys.exit(1)
-        print >>sys.stderr, "Writing new config file for your user"
-        print >>sys.stderr, "Initializing a new DB will destroy any data in Mongo if you have anything there"
-        date = raw_input("Enter today's date in YYYY-MM-DD to confirm:")
+        print("Writing new config file for your user", file=sys.stderr)
+        print("Initializing a new DB will destroy any data in Mongo if you have anything there", file=sys.stderr)
+        date = input("Enter today's date in YYYY-MM-DD to confirm:")
         lpad_file = os.path.join(FW_LPAD_CONFIG_LOC, self.lpad_cfg_filename())
         fh = open(lpad_file,"w")
         yaml_dict =  { "username" : self.user,
@@ -252,8 +252,8 @@ class DatabaseManager():
                 "logdir" : "null",
                 "password" : "speakfriendandenter",
                 "port" : self.port }
-        for key, value in yaml_dict.items():
-            print >>sys.stderr, "Config: %s:%s" % (key, value)
+        for key, value in list(yaml_dict.items()):
+            print("Config: %s:%s" % (key, value), file=sys.stderr)
             fh.write(key + ": " + value + "\n")
         fh.close()
         self.client.admin.authenticate("fireworks", "speakfriendandenter")

@@ -55,9 +55,9 @@ def generate_group_file(sample_group_file, output_dir):
             bams_in_group[group_id] = bams_in_group[group_id] + sample_map[sample_name]['md_bams']
             samples_in_group[group_id].append(sample_name)
         else:
-            print >>sys.stderr, "Sample from group file not in map file!"
-    for (group, sample_bams) in bams_in_group.items():
-        print group, sample_bams
+            print("Sample from group file not in map file!", file=sys.stderr)
+    for (group, sample_bams) in list(bams_in_group.items()):
+        print(group, sample_bams)
         ofh.writerow([group, ",".join(sample_bams), ",".join(samples_in_group[group])])
     return outfile 
     
@@ -79,17 +79,17 @@ def construct_workflow(map_file, pair_file, group_file, output_dir, targets):
     
 
     #FIXME move this into workflow or provide convenience function?
-    for key in process_job_deps.keys():
+    for key in list(process_job_deps.keys()):
         if key not in align_job_deps:
             align_job_deps[key]=process_job_deps[key]
         else:
             align_job_deps[key]=[align_job_deps[key], process_job_deps[key]]
-    for key in qc_job_deps.keys():
+    for key in list(qc_job_deps.keys()):
         if key not in align_job_deps:
             align_job_deps[key]=qc_job_deps[key]
         else:
             align_job_deps[key]=[align_job_deps[key], qc_job_deps[key]]
-    for key in variant_job_deps.keys():
+    for key in list(variant_job_deps.keys()):
         if key not in align_job_deps:
             align_job_deps[key]=variant_job_deps[key]
         else:
@@ -145,13 +145,13 @@ def fix_bam_and_call_variants(mdbam_group_file, pair_file, final_sample_jobs, ou
                 job_deps[realigner_target_job]=indel_realigner_job
                 job_list = job_list + [realigner_target_job, indel_realigner_job]
             #hook up this new section the pipeline to the previous jobs in terms of job dependencies
-            for sample, job in final_sample_jobs.items():
+            for sample, job in list(final_sample_jobs.items()):
                 if sample in sample_list:
                     job_deps[job]=realigner_target_jobs 
         else:
             #abra
             (abra_job, out_bams) = run_abra(bam_list, output_dir, group)
-            for sample, job in final_sample_jobs.items():
+            for sample, job in list(final_sample_jobs.items()):
                 if sample in sample_list:
                     job_deps[job]=abra_job
             job_list.append(abra_job)
@@ -231,10 +231,10 @@ def fix_bam_and_call_variants(mdbam_group_file, pair_file, final_sample_jobs, ou
             os.makedirs(facets_dir)
 
         if normal not in sample_map:
-            print >>sys.stderr, "Normal sample %s not in sampl map, skipping row" % normal
+            print("Normal sample %s not in sampl map, skipping row" % normal, file=sys.stderr)
             continue
         if tumor not in sample_map:
-            print >>sys.stderr, "tumor sample %s not in sampl map, skipping row" % tumor
+            print("tumor sample %s not in sampl map, skipping row" % tumor, file=sys.stderr)
             continue
         #FIXME improve dependencies to match pairs to group (would be nice to have them in same file...)
         (mutect_job, mutect_vcf) = mutect(normal, tumor, output_dir)
@@ -283,13 +283,13 @@ def facets_file_job(output_dir):
     output_file = os.path.join(output_dir, "facets_data_file")
     facets_dir = os.path.join(output_dir, "facets", "")
     ff_cmd = ['cmo_make_facets_file', '--output-file', output_file, '--pipeline-dir', facets_dir]
-    print >>sys.stderr ," ".join(ff_cmd)
+    print(" ".join(ff_cmd), file=sys.stderr)
     return (workflow.Job(" ".join(ff_cmd), name="Make Facets Data File"), output_file)
 
 def maf_anno_job(facets_file, input_maf, output_dir):
     output_maf = os.path.join(output_dir, project+ "___SOMATIC.vep.facets_anno.maf") 
     ma_cmd = ['cmo_facets', 'mafAnno', '-m', input_maf, '-f', facets_file, '-o', output_maf]
-    print >>sys.stderr, " ".join(ma_cmd)
+    print(" ".join(ma_cmd), file=sys.stderr)
     return (workflow.Job(" ".join(ma_cmd), name="Annotate MAF with Facets"), output_maf)
 
 
@@ -337,7 +337,7 @@ def filter_mutect_job(input, pairing_file, output_dir):
 def merged_maf_job(maf_inputs, output_dir):
     merged_maf_name = os.path.join(output_dir, "intFiles", "merge_maf3")
     merge_mafs_cmd = ["cmo_merge_mafs", " ".join(maf_inputs), "--output-file", merged_maf_name]
-    print >>sys.stderr, " ".join(merge_mafs_cmd)
+    print(" ".join(merge_mafs_cmd), file=sys.stderr)
     return (workflow.Job(" ".join(merge_mafs_cmd), name="Merge Mafs"), merged_maf_name)
 
 def trinuc_and_impact_job(merged_maf_name, output_dir):
@@ -347,7 +347,7 @@ def trinuc_and_impact_job(merged_maf_name, output_dir):
             "--genome", genome_string, 
             "--output-seq", seq_output, 
             "--output-impact", impact_output]
-    print >>sys.stderr, " ".join(trinuc_cmd)
+    print(" ".join(trinuc_cmd), file=sys.stderr)
     return (workflow.Job(" ".join(trinuc_cmd), name="Trinuc and Impact"), seq_output, impact_output)
 
 def maf2maf(merged_maf_name, output_dir):
@@ -360,7 +360,7 @@ def maf2maf(merged_maf_name, output_dir):
             '--input-maf', merged_maf_name,
             '--output-maf', output_file
             ]
-    print >>sys.stderr, " ".join(maf2maf_cmd)
+    print(" ".join(maf2maf_cmd), file=sys.stderr)
     return (workflow.Job(" ".join(maf2maf_cmd), name="maf2maf"), output_file)
 
 def add_variant_info(seq_input, impact_pos_input, orig_maf, output_dir):
@@ -593,10 +593,10 @@ def merge_sam_files(group, bam_hash, output_dir):
     #FIXME fix picard helper to accept default options instead of hiding them?
     out_bam = os.path.join(output_dir, "intFiles", "_".join([project, group,"indelRealigned_recal.bam"]))
     cmd = ["cmo_picard", "--cmd MergeSamFiles", "--SO coordinate", ]
-    for bam in bam_hash.values():
+    for bam in list(bam_hash.values()):
         cmd = cmd + ["--I", bam]
     cmd = cmd + ["--O", out_bam]
-    print " ".join(cmd)
+    print(" ".join(cmd))
     job = workflow.Job(" ".join(cmd), name="Merge bams",resources="rusage[iounits=6, mem=20]")
     return (job, out_bam)
         
@@ -643,7 +643,7 @@ def prepare_directories(map_file, output_dir):
         if not line: 
             break
         map_values= line.rstrip().split("\t")
-        sample_dict = dict(zip(map_keys, map_values))
+        sample_dict = dict(list(zip(map_keys, map_values)))
         sample_key = sample_dict['sample_id'] + sample_dict['library_id'] + sample_dict['run_id']
         if sample_key in sample_map:
             sample_key = sample_key + "_"+ str(slr_count)
@@ -664,7 +664,7 @@ def prepare_directories(map_file, output_dir):
         #sample_map[sample_key] = sample_dict
         sample_map[sample_dict['sample_id']]=sample_dict
     #print sample_map
-    for id, sample in sample_map.items():
+    for id, sample in list(sample_map.items()):
         sample_output_dir = os.path.join(output_dir, sample['sample_id'], sample['library_id'], sample['run_id'])
         if not os.path.exists(sample_output_dir):
             os.makedirs(sample_output_dir)
@@ -684,14 +684,14 @@ def sort_fastqs_into_dict(files):
     paired_by_sample = defaultdict(dict)
     for file in files:
         base = os.path.basename(file)
-        print base
+        print(base)
         m = re.search("(?P<sample>[^_]+)_?(?P<barcode>\S+)?_?(?P<flowcell>\S+)?_(?P<lane>\S+)_(?P<read>R[12])_(?P<set>\d\d\d).fastq.gz", base)
         if not m:
             m = re.search("(?P<sample>[^_]+)_(?P<barcode>\S+)_(?P<flowcell>\S+)_(?P<lane>\S+)_(?P<set>\d\d\d).(?P<read>R[12]).fastq.gz", base)
-        print m.groups()
+        print(m.groups())
         if not m or not ( m.group('sample') and m.group('read') and m.group('set')):
             #FIXME LOGGING instead of CRITICAL fail?
-            print >>sys.stderr, "Can't find filename parts (Sample/Barcode, R1/2, group) for this fastq: %s" % file
+            print("Can't find filename parts (Sample/Barcode, R1/2, group) for this fastq: %s" % file, file=sys.stderr)
             sys.exit(1)
         #fastq file large sample and barcode prefix
         readset = "_".join([m.group('sample') + m.group('lane')  + m.group('set')])
@@ -709,8 +709,8 @@ def sort_fastqs_into_dict(files):
                     try:
                         paired_by_sample[sample][readset].append(sorted[sample][readset][read])
                     except: 
-                        print >>sys.stderr, "cant find %s for %s" % (read, readset)
-                        print >>sys.stderr, "aligning as single end"
+                        print("cant find %s for %s" % (read, readset), file=sys.stderr)
+                        print("aligning as single end", file=sys.stderr)
                 else:
                     paired_by_sample[sample][readset]=[sorted[sample][readset][read]]
     return paired_by_sample
@@ -720,10 +720,10 @@ def sort_fastqs_into_dict(files):
 
 def calculate_min_read_length(fastq):
     cmd = ["zcat", fastq, "| head -n 2 | tail -n 1 | wc -c"]
-    print " ".join(cmd)
+    print(" ".join(cmd))
     read_length = subprocess.check_output(" ".join(cmd), shell=True, stderr=open(os.devnull,"w"))
     min_read_length = int(read_length.rstrip())/ 2
-    print "Min Read Length: %d" % min_read_length
+    print("Min Read Length: %d" % min_read_length)
     return min_read_length
 
 
@@ -774,23 +774,23 @@ def align_reads(alignment_directories, output_dir):
         #store bams for merge
         min_read_length = None
         #GUNZIP, ConvertQuality Score, and split raw fastqs into 4million read chunks
-        for sample, sample_readsets in read_pairs.items():
+        for sample, sample_readsets in list(read_pairs.items()):
             #FIXME this god damn underscore dash hack 
             if sample not in sample_map:
                 sample_map_key = sample.replace("-","_")
                 if sample_map_key not in sample_map:
                     sample_map_key = "s_" + sample_map_key
                     if sample_map_key not in sample_map:
-                        print >>sys.stderr, "can't lookup sample in internal sample_map, even with s_ and hyphern replacement: %s" % sample
-                        print >>sys.stderr, "Sample map contents:"
-                        print >>sys.stderr, sample_map
+                        print("can't lookup sample in internal sample_map, even with s_ and hyphern replacement: %s" % sample, file=sys.stderr)
+                        print("Sample map contents:", file=sys.stderr)
+                        print(sample_map, file=sys.stderr)
                         sys.exit(1)
             else:
                 sample_map_key = sample
             bams = []
             bwa_jobs = []
             readset_id = sample_map[sample_map_key]['readset_id']
-            for readset, fastqs in sample_readsets.items():
+            for readset, fastqs in list(sample_readsets.items()):
                 readset_outputs = defaultdict(list)
                 for fastq in fastqs:
                     if not min_read_length:
@@ -806,7 +806,7 @@ def align_reads(alignment_directories, output_dir):
                     split_jobs[readset].append(split_job)
                 #store bwa jobs for dependencies of merge
                 cut_jobs = defaultdict(list)
-                for readset_chunk, fastqs in readset_outputs.items():
+                for readset_chunk, fastqs in list(readset_outputs.items()):
                     #FIXME could be broken for Single end
                     for i in range(0, len(fastqs[0])):
                         read1 = fastqs[0][i]
@@ -826,7 +826,7 @@ def align_reads(alignment_directories, output_dir):
                         cut_jobs[readset_chunk].append(cut_job)
                         jobs_list = jobs_list + [cut_job, bwa_job]
                         job_deps[cut_job]=[bwa_job, cutadapt_metrics_job]
-                    for readset_chunk in readset_outputs.keys():
+                    for readset_chunk in list(readset_outputs.keys()):
                         for split_job in split_jobs[readset_chunk]:
                             job_deps[split_job]=cut_jobs[readset_chunk]
                  #put final bam in the fastq directory!
@@ -848,7 +848,7 @@ def gunzip_fastq(fastq):
     (unzipped_fastq, ext) = os.path.splitext(fastq)
 
     cmd = ["zcat", fastq, ">", unzipped_fastq]
-    print " ".join(cmd)
+    print(" ".join(cmd))
     gz_job = workflow.Job(" ".join(cmd), name="gunzip " + os.path.basename(unzipped_fastq))
     return(unzipped_fastq, gz_job)
 
@@ -857,7 +857,7 @@ def convert_quality_score(fastq):
     output = basename + "_CQS"
     log = output + ".log"
     cmd = [cmo.util.programs['convertqualityscore']['default'], "--input", fastq, "--output", output, ">", log ]
-    print " ".join(cmd)
+    print(" ".join(cmd))
     cqs_job = workflow.Job(" ".join(cmd), name="CQS " + os.path.basename(fastq))
     return (output, cqs_job)
 
@@ -890,7 +890,7 @@ def split_reads(cqs_fastq, orig_gzip_fastq):
     "-f", cqs_fastq
     ]
     split_job = workflow.Job(" ".join(cmd), name="split "+os.path.basename(cqs_fastq))
-    print " ".join(cmd)
+    print(" ".join(cmd))
     out_files = []
     for i in range(0, int(num_pieces)):
         out_files.append(out_prefix + "{:0>3d}".format(i))
@@ -913,13 +913,13 @@ def cutadapt(read1, read2, min_read_length):
 
     except:
         read2_out = None
-        print >>sys.stderr, "No read 2 for %s" % read1
+        print("No read 2 for %s" % read1, file=sys.stderr)
         cmd = [PYTHON, cmo.util.programs['cutadapt']['default'], 
               "-f fastq", "-a", r1_adaptor,
               "-O 10", "-m", str(min_read_length), 
               "-q 3", "-o", read1_out, 
               read1, ">", stats_file]
-    print " ".join(cmd)
+    print(" ".join(cmd))
     cut_job = workflow.Job(" ".join(cmd), name="cutadapt " + os.path.basename(read1_out))
     return (read1_out, read2_out, cut_job)
     
@@ -934,7 +934,7 @@ def bwa(read1, read2, readgroup):
     else:
         cmd = ["cmo_bwa_mem", "--version default", "--genome", genome_string, "--fastq1", read1, "--output", bam, "-P", "-M", "-R", '"' + readgroup +'"', "-t 12"]
     bwa_job =  workflow.Job(" ".join(cmd), resources="rusage[mem=12]", processors="12",name="bwa " + os.path.basename(bam))
-    print " ".join(cmd)
+    print(" ".join(cmd))
     return(bam, bwa_job)
 
 def samtools_index(bam):
@@ -950,7 +950,7 @@ def picard_merge(bams, readset, directory):
     for bam in bams:
         cmd = cmd + ["--I", bam]
     cmd = cmd + ["--O", out_bam]
-    print " ".join(cmd)
+    print(" ".join(cmd))
     picard_job = workflow.Job(" ".join(cmd), name="Merge bams " + readset,resources="rusage[iounits=6, mem=20]")
     return (picard_job, out_bam)
 
@@ -967,7 +967,7 @@ def picard_markdups(bam, readset, directory):
     cmd = cmd + ["--I", bam]
     cmd = cmd + ["--O", out_bam]
     cmd = cmd + ["--M", out_metrics]
-    print " ".join(cmd)
+    print(" ".join(cmd))
     picard_job = workflow.Job(" ".join(cmd), name="Markdup " + readset,resources="rusage[mem=30]", processors=3)
     return (picard_job, out_bam, out_metrics)
 
@@ -996,7 +996,7 @@ def process_bams(merged_bams, output_dir, last_align_jobs, targets):
     metrics_jobs_and_files = defaultdict(list)
     dc_outs = list()
     #merge and deduplicate by sample, library
-    for lib, readset_list in samplelib_grouping.items():
+    for lib, readset_list in list(samplelib_grouping.items()):
         bams = list()
         for readset in readset_list:
             bams = bams + merged_bams[readset]
@@ -1024,7 +1024,7 @@ def process_bams(merged_bams, output_dir, last_align_jobs, targets):
         jobs_list.append(index_job)
         by_sample_jobs[sample_id].append(index_job)
     #merge deduplicated library bams by sample
-    for sample, bams in by_sample_bams.items():
+    for sample, bams in list(by_sample_bams.items()):
         bysample_output_directory = os.path.join(output_dir,
                 sample,
                 '')
@@ -1038,7 +1038,7 @@ def process_bams(merged_bams, output_dir, last_align_jobs, targets):
         for precursor_job in by_sample_jobs[sample]:
             job_deps[precursor_job]=sample_merge_job
         #next run a bunch of picard metric tools
-    for sample, bam in final_sample_bams.items():
+    for sample, bam in list(final_sample_bams.items()):
         (hsmetrics_job, hs_out) = hs_metrics(sample,bam, output_dir, targets)
         #FIXME only run if PE
         metrics_jobs_and_files['HsMetrics'].append((hsmetrics_job, hs_out))
@@ -1064,7 +1064,7 @@ def merge_stats(metrics_jobs_and_files, root_dir, pair_file):
         os.makedirs(output_dir)
     new_jobs = []
     new_job_deps = {}
-    for stat_type in metrics_jobs_and_files.keys():
+    for stat_type in list(metrics_jobs_and_files.keys()):
         jobs_and_files = metrics_jobs_and_files[stat_type]
         if stat_type == "DOC":
             (job, job_deps) = merge_gatk_metrics(jobs_and_files, pair_file, root_dir, output_dir)
@@ -1073,7 +1073,7 @@ def merge_stats(metrics_jobs_and_files, root_dir, pair_file):
         else:
             (job, job_deps) = merge_picard_metrics(jobs_and_files, stat_type, output_dir)
         new_jobs.append(job)
-        for (key, deps) in job_deps.items():
+        for (key, deps) in list(job_deps.items()):
             if key in new_job_deps:
                 new_job_deps[key]=[new_job_deps[key], job_deps[key]]
             else:
@@ -1129,7 +1129,7 @@ def merge_picard_metrics(jobs_and_files, stat_type, output_dir):
     output_file = os.path.join(output_dir, project + "_" + stat_type + ".txt")
     jobs = []
     files = []
-    print jobs_and_files
+    print(jobs_and_files)
     for (job, filename) in jobs_and_files:
         jobs.append(job)
         files.append(filename)
@@ -1164,7 +1164,7 @@ def hs_metrics(sample,bam, output_dir, targets):
     cmd = cmd + ["--N" , bait_setname]
     targets_ilist = cmo.util.targets[targets]['targets_ilist']
     cmd = cmd + ["--TI", targets_ilist]
-    print " ".join(cmd)
+    print(" ".join(cmd))
     metrics_job = workflow.Job(" ".join(cmd), name="HsMetrics " + sample,resources="rusage[mem=10]", processors=1)
     return (metrics_job, out)
 
@@ -1177,7 +1177,7 @@ def insertsize_metrics(sample,bam, output_dir):
     cmd = cmd + ["--H", outhist]
     cmd = cmd + ["--LEVEL", "null"]
     cmd = cmd + ["--LEVEL", "SAMPLE"]
-    print " ".join(cmd)
+    print(" ".join(cmd))
     metrics_job = workflow.Job(" ".join(cmd), name="InsertSizeMetrics " + sample,resources="rusage[mem=10]", processors=1)
     return (metrics_job, out, outhist)
 
@@ -1188,7 +1188,7 @@ def alignment_summary(sample,bam, output_dir):
     cmd = cmd + ["--O", out]
     cmd = cmd + ["--LEVEL", "null"]
     cmd = cmd + ["--LEVEL", "SAMPLE"]
-    print " ".join(cmd)
+    print(" ".join(cmd))
     metrics_job = workflow.Job(" ".join(cmd), name="AlignmentSummary " + sample,resources="rusage[mem=10]", processors=3)
     return (metrics_job, out)
 
@@ -1200,7 +1200,7 @@ def oxog_metrics(sample,bam, output_dir):
     #FIXME accept arbitrary refseq
     cmd = cmd + ["--R", genome_string]
     cmd = cmd + ["--DB_SNP", dbsnp]
-    print " ".join(cmd)
+    print(" ".join(cmd))
     metrics_job = workflow.Job(" ".join(cmd), name="AlignmentSummary " + sample,resources="rusage[mem=10]", processors=3)
     return (metrics_job, out)
 
@@ -1218,7 +1218,7 @@ def gatk_doc(sample,bam, output_dir, targets):
     cmd = cmd + ["-rf", "BadCigar"]
     cmd = cmd + ["-baseCounts"]
     cmd = cmd + ["-mmq", "20", "-mbq", "0"]
-    print " ".join(cmd)
+    print(" ".join(cmd))
     metrics_job = workflow.Job(" ".join(cmd), name="GATK DoC " + sample,resources="rusage[mem=10]", processors=3)
     return (metrics_job, out)
 
@@ -1233,7 +1233,7 @@ if __name__=='__main__':
     parser.add_argument("--pair-file", help="file listing tumor/normal pairs for mutect/maf conversion")
     parser.add_argument("--patient-file", help="if a patient file is given, patient wide fillout will be added to maf file")
     parser.add_argument("--project", help="name of project", default="RefAlign")
-    parser.add_argument("--targets", choices=cmo.util.targets.keys(), required=True)
+    parser.add_argument("--targets", choices=list(cmo.util.targets.keys()), required=True)
     parser.add_argument("--workflow-mode", choices=["serial","LSF"], default="LSF", help="select 'serial' to run all jobs on the launching box. select 'LSF' to parallelize jobs as much as possible on luna")
     parser.add_argument("--workflow-name", default="Reference alignment", help="name for this worklfow on GUI")
     parser.add_argument("--genome", choices=["GRCh37", "hg19"], default="GRCh37")

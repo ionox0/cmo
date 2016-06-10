@@ -17,7 +17,7 @@ def main(source_file_list, output_file, column_range):
         try:
             cmo.util.call_cmd(" ".join(cmd), stdout=fh)
         except:
-            print >>sys.stderr, "Merge failed, is %s empty?" % file
+            print("Merge failed, is %s empty?" % file, file=sys.stderr)
             pass
 
 

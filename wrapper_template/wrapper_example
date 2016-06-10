@@ -12,10 +12,10 @@ if __name__ =='__main__':
     #start creating your argument parser with a short description of your code
     parser = argparse.ArgumentParser(description="Short description of your code")
     #need a genome file? use the util.genomes.keys() to determine all available versions for your tool to use
-    parser.add_argument("--genome", choices=cmo.util.genomes.keys(), required=True)
+    parser.add_argument("--genome", choices=list(cmo.util.genomes.keys()), required=True)
     parser.add_argument("--number-setting-with-default", default=52, type=int, required=True)
     #need a specific program? automatically offer all installed versions by getting programs['progname'].keys()
-    parser.add_argument("--version", required=True, choices=cmo.util.programs['progname'].keys())
+    parser.add_argument("--version", required=True, choices=list(cmo.util.programs['progname'].keys()))
     args = parser.parse_args()
     #look up specific subfiles for your genomes
     fasta = cmo.util.genomes[args.genome]['fasta']
@@ -26,6 +26,6 @@ if __name__ =='__main__':
     args_dict.pop("genome")
     args_dict.pop("fastq")
     args_dict.pop("output")
-    print bwa_helper.aln(fasta, fastq, output, args_dict)
+    print(bwa_helper.aln(fasta, fastq, output, args_dict))
 
 

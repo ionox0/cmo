@@ -11,19 +11,19 @@ def main(source_file, bedtools_genome, genome, impact_genome_targets, output_seq
         if not os.path.exists(temp_dir):
             try:
                 os.makedirs(temp_dir)
-            except OSError, e:
+            except OSError as e:
                 if os.errno == 17:
                     pass
                 else:
-                    print >>sys.stderr, e
+                    print(e, file=sys.stderr)
                     sys.exit(1)
         temp_bed = os.path.join(temp_dir, temp_bed)
     bed_cmd = [ "cat", source_file, "|", " grep -E -v '(^#|^Hugo)'", "|", """awk 'BEGIN {FS="\t";OFS=FS}{print $5,$6-1, $7}' """, ">", temp_bed]
-    print >>sys.stderr, " ".join(bed_cmd)
+    print(" ".join(bed_cmd), file=sys.stderr)
     cmo.util.call_cmd(" ".join(bed_cmd))
     bedtools_slop = ["cmo_bedtools", "--cmd slopBed", "-b 1", "-g", bedtools_genome, "-i", temp_bed, 
             "|" , "cmo_bedtools", "--cmd fastaFromBed", "-tab", "-fi", genome, "-fo", output_seq, "-bed -"]
-    print >>sys.stderr, " ".join(bedtools_slop)
+    print(" ".join(bedtools_slop), file=sys.stderr)
     cmo.util.call_cmd(" ".join(bedtools_slop))
     if impact_genome_targets: 
         bedtools_intersect = [ "cmo_bedtools", "--cmd", "intersectBed", "-a", temp_bed,
@@ -31,7 +31,7 @@ def main(source_file, bedtools_genome, genome, impact_genome_targets, output_seq
             "|", "cmo_bedtools", "--cmd", "sortBed", "-i", "-", 
             "|", """ awk '{print $1":"$2+1"-"$3}' """
             "|", "uniq", ">", output_impact ]
-        print >>sys.stderr, " ".join(bedtools_intersect)
+        print(" ".join(bedtools_intersect), file=sys.stderr)
         cmo.util.call_cmd(" ".join(bedtools_intersect))
                 
 
@@ -48,14 +48,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Do Dat PostProcessing")
     parser.add_argument("--output-seq", required=True, help="destination of filtered output")
     parser.add_argument("--output-impact", help="impact positions membership")
-    parser.add_argument("--genome", required=True, choices=cmo.util.genomes.keys())
+    parser.add_argument("--genome", required=True, choices=list(cmo.util.genomes.keys()))
     parser.add_argument("--source-file", required=True, help="input MAF")
     parser.add_argument("--temp-dir", help="temp directroy for intermediate files")
     args = parser.parse_args()
     bedtools_genome = cmo.util.genomes[args.genome]['bedtools_genome']
     try:
         impact_targets = cmo.util.genomes[args.genome]['impact410_targets']
-    except KeyError, e:
+    except KeyError as e:
         impact_targets = None
     if args.output_impact:
         args.output_impact = os.path.abspath(args.output_impact)

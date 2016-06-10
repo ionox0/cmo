@@ -35,17 +35,17 @@ def find_command_options(getbasecounts_command):
 if __name__ =='__main__':
     #partially parse options to get versin/subcommand and add more options
     verparser = argparse.ArgumentParser(description="run GetBaseCounts", add_help=False)
-    verparser.add_argument("--version", choices=cmo.util.programs['getbasecounts'].keys(), default="default")
+    verparser.add_argument("--version", choices=list(cmo.util.programs['getbasecounts'].keys()), default="default")
     options, _ = verparser.parse_known_args()
     #ok it was a valid subcommand, add the options we found and the genome option
     parser = argparse.ArgumentParser(parents= [ verparser ], add_help=True)
     command = cmo.util.programs['getbasecounts'][options.version]
     command_options = find_command_options(command)
-    print command_options
-    for arg, help in command_options.items():
+    print(command_options)
+    for arg, help in list(command_options.items()):
         help = help.replace("%","%%")
         if(arg =="--fasta"):
-            parser.add_argument(arg, action="store", choices=cmo.util.genomes.keys())
+            parser.add_argument(arg, action="store", choices=list(cmo.util.genomes.keys()))
         elif(arg =="--help"):
             continue
         elif arg in ['--sort_output', '--compress_output']:
@@ -58,17 +58,17 @@ if __name__ =='__main__':
     if not args.fasta:
         if not args.bam:
             parser.print_help()
-            print >>sys.stderr, "You must supply a bam!"
+            print("You must supply a bam!", file=sys.stderr)
             sys.exit(1)
         (genome, fasta) = cmo.util.infer_fasta_from_bam(args.bam)
         if not args.vcf:
             if 'facets_snps' in cmo.util.genomes[genome]:
                 args.vcf = cmo.util.genomes[genome]['facets_snps']
             else:
-                print >>sys.stderr, "SNPs are not stored for this fasta- please supply a SNP file"
+                print("SNPs are not stored for this fasta- please supply a SNP file", file=sys.stderr)
                 sys.exit(1)
         if not fasta:
-            print >>sys.stderr, "Unable to infer fasta from bam- supply fasta"
+            print("Unable to infer fasta from bam- supply fasta", file=sys.stderr)
             sys.exit(1)
         else:
             args.fasta = fasta
@@ -81,17 +81,17 @@ if __name__ =='__main__':
     cmo.util.remove_logging_options_from_dict(command_specific_args)
     for key in  ["version"]:
         del command_specific_args[key]
-    command_specific_args = dict((k, v) for k, v in command_specific_args.iteritems() if v)
+    command_specific_args = dict((k, v) for k, v in command_specific_args.items() if v)
     cmd = [command]
     stdin=None
-    for option, value in command_specific_args.items():
+    for option, value in list(command_specific_args.items()):
             if value ==True:
                 cmd = cmd + ["--"+option]
             elif value!=False:
                 cmd = cmd + ["--"+option, value]
                 if value == "stdin":
                     stdin=sys.stdin
-    print >>sys.stderr, " ".join(cmd)
+    print(" ".join(cmd), file=sys.stderr)
     cmo.util.call_cmd(" ".join(cmd), stderr=stderr, stdout=stdout, stdin=stdin)
 
      

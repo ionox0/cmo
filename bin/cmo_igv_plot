@@ -20,7 +20,7 @@ def find_maf_in_proj(directory):
     maf = glob.glob(os.path.join(probably_this_dir, maf_pattern))
     if len(maf) > 0 and os.path.exists(maf[0]):
         return maf[0], newest
-    print >>sys.stderr, "Cant find maf in r_###/post/*_SOMATIC_FACETS.vep.maf OR /post/*_SOMATIC_FACETS.vep.maf"
+    print("Cant find maf in r_###/post/*_SOMATIC_FACETS.vep.maf OR /post/*_SOMATIC_FACETS.vep.maf", file=sys.stderr)
     sys.exit(1)
 
 def find_bams_in_dir(directory, relative_dir):
@@ -50,10 +50,10 @@ if __name__ =='__main__':
     (maf, relative_dir) = find_maf_in_proj(args.project_directory)
     bam_dict = find_bams_in_dir(args.project_directory, relative_dir)
     maffh = open(maf, "rb")
-    reader = csv.DictReader(filter(lambda row: row[0]!='#', maffh), delimiter="\t")
+    reader = csv.DictReader([row for row in maffh if row[0]!='#'], delimiter="\t")
     row_count = 0
     locus_files = dict()
-    print >>sys.stderr, "aggregating variants into locus files...."
+    print("aggregating variants into locus files....", file=sys.stderr)
     for row in reader:
         row_count+=1
         if row['Consequence'] in args.variant_types:
@@ -74,10 +74,10 @@ if __name__ =='__main__':
                     locus_files[tumor_barcode][normal_barcode]=list()
             locus_files[tumor_barcode][normal_barcode].append(position_string)
         if(row_count % 10000 == 0):
-            print "\r %d variants processed" % row_count,
-    print >>sys.stderr, "Taking screenshots..."
-    for tumor_barcode in locus_files.keys():
-        for normal_barcode in locus_files[tumor_barcode].keys():
+            print("\r %d variants processed" % row_count, end=' ')
+    print("Taking screenshots...", file=sys.stderr)
+    for tumor_barcode in list(locus_files.keys()):
+        for normal_barcode in list(locus_files[tumor_barcode].keys()):
             prefix = "_".join([tumor_barcode, normal_barcode])
             os.makedirs(prefix)
             locus_filename = os.path.abspath(os.path.join(args.output_directory, prefix, prefix +".locus"))
@@ -94,7 +94,7 @@ if __name__ =='__main__':
                     "--height", "1024",
                     "--width", "768",
                     "--igv-jar-path","/opt/common/CentOS_6-dev/igv/v2.3.60/igv.jar"]
-            print " ".join(cmd)
+            print(" ".join(cmd))
             subprocess.call(cmd)
 
                    

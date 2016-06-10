@@ -12,8 +12,8 @@ def parse_script_help(script_path):
 if __name__ =='__main__':
     # We'll first need to figure out which version to run with "-h" to parse the help text
     preparser = argparse.ArgumentParser(description="run maf2maf", add_help=False)
-    preparser.add_argument("--version", choices=cmo.util.programs['vcf2maf'].keys(), default="default")
-    preparser.add_argument("--vep-release", choices=cmo.util.programs['vep'].keys(), default="default")
+    preparser.add_argument("--version", choices=list(cmo.util.programs['vcf2maf'].keys()), default="default")
+    preparser.add_argument("--vep-release", choices=list(cmo.util.programs['vep'].keys()), default="default")
     preparser.add_argument("--species", choices=["homo_sapiens","mus_musculus"], default="homo_sapiens")
     preparser.add_argument("--ncbi-build", choices=["GRCh37","GRCh38","GRCm37"], default="GRCh37")
     options, _ = preparser.parse_known_args()
@@ -22,7 +22,7 @@ if __name__ =='__main__':
     args_dict = parse_script_help(script_path)
     parser = argparse.ArgumentParser(parents = [preparser], add_help=True)
 
-    for arg, description in args_dict.items():
+    for arg, description in list(args_dict.items()):
         # Hide a few arguments from the user so we can populate them ourselves
         if arg in ["--help","--man","--vep-path","--vep-data","--ref-fasta","--species","--ncbi-build"]:
             continue
@@ -52,11 +52,11 @@ if __name__ =='__main__':
     stderr = args.stderr
     stdout = args.stdout
     # Trim out arguments without values, and also any args that might mess with our logging
-    args_dict = dict((k, v) for k, v in args_dict.iteritems() if v)
+    args_dict = dict((k, v) for k, v in args_dict.items() if v)
     cmo.util.remove_logging_options_from_dict(args_dict)
 
     # Make sure the arguments are in a format that the script will accept, and kick it off
-    for arg, value in args_dict.items():
+    for arg, value in list(args_dict.items()):
         arg = arg.replace("_","-")
         cmd = cmd + ["--"+arg, value]
     cmo.util.call_cmd(" ".join(cmd), stdout=stdout, stderr=stderr)

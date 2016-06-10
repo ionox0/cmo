@@ -12,11 +12,11 @@ def main(pairing_file, haplotype_vcf, pipeline_dir, final_output_file, temp_dir=
         if not os.path.exists(temp_dir):
             try:
                 os.makedirs(temp_dir)
-            except OSError, e:
+            except OSError as e:
                 if e.errno == 17: #file exists, some other step already made it critical race
                     pass
                 else:
-                    print >> sys.stderr, e
+                    print(e, file=sys.stderr)
                     sys.exit(1)
 
         outputs = [ os.path.join(temp_dir, file) for file in outputs]
@@ -46,7 +46,7 @@ def main(pairing_file, haplotype_vcf, pipeline_dir, final_output_file, temp_dir=
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Do Dat PostProcessing")
     parser.add_argument("--pairing-file", required=True, help="Dat pairing file")
-    parser.add_argument("--version", default="default", choices=cmo.util.programs['postprocess'].keys(), help="Post Process pipeline version")
+    parser.add_argument("--version", default="default", choices=list(cmo.util.programs['postprocess'].keys()), help="Post Process pipeline version")
     parser.add_argument("--haplotype-vcf", required=True, help="Haplotype Caller output")
     parser.add_argument("--output-file", required=True, help="destination of filtered output")
     parser.add_argument("--temp-dir", help="temp directory, if desired")

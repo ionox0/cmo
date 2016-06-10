@@ -17,10 +17,10 @@ test_inputs = {"pairing_file": "Proj_04525_J_sample_pairing.txt",
         "mutect_vcf": "Proj_04525_J_s_JH_rec3_041_N_s_JH_rec3_041_P2_mutect_calls.short.vcf"}
 dev_null = open("/dev/null", "w")
 
-for key, value in test_inputs.items():
+for key, value in list(test_inputs.items()):
     test_inputs[key]= os.path.join(TEST_DATA_DIR, "inputs", value)
 
-for key, value in test_expected_outputs.items():
+for key, value in list(test_expected_outputs.items()):
     test_expected_outputs[key] = os.path.join(TEST_DATA_DIR, value)
 
 def setup_module():
@@ -42,7 +42,7 @@ def test_filter_haplotype():
             '--output-file', test_output,
             '--temp-dir', TEST_TEMP_DIR]
     try:
-        print " ".join(cmd)
+        print(" ".join(cmd))
         rv = subprocess.call(cmd, stderr=dev_null)
         assert rv==0
     except:
@@ -65,7 +65,7 @@ def test_filter_mutect():
             '--output-file', test_output,
             '--temp-dir', TEST_TEMP_DIR]
     try:
-        print " ".join(cmd)
+        print(" ".join(cmd))
         rv = subprocess.call(cmd, stderr=dev_null)
         assert rv==0
     except:
@@ -87,7 +87,7 @@ def test_merge_mafs():
             test_expected_outputs['filter_haplotype'],
             '--output-file', test_output]
     try:
-        print " ".join(cmd)
+        print(" ".join(cmd))
         rv = subprocess.call(cmd, stderr=dev_null)
         assert rv==0
     except:
@@ -165,7 +165,7 @@ def test_add_variant_info():
         assert False, "unable to run add_variant_info: %s" % " ".join(cmd)
     test_sorted_output = os.path.join(TEST_TEMP_DIR, "sorted_final_maf")
     sort_cmd = ["sort" , "-k5,6n", test_output, ">", test_sorted_output]
-    print " ".join(sort_cmd)
+    print(" ".join(sort_cmd))
     rv = subprocess.call(" ".join(sort_cmd), shell=True, stderr=dev_null)
     diff_cmd = ['diff', expected_output, test_sorted_output]
     try:

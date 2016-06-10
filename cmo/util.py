@@ -24,7 +24,7 @@ def find_chromosomes(genome_string, extended=False):
     try:
         fasta = genomes[genome_string]['fasta']
     except:
-        print >>sys.stderr ,"Genome %s does not have a fasta entry in cmo_resources.json, unable to find chromosome list" % genome_string
+        print("Genome %s does not have a fasta entry in cmo_resources.json, unable to find chromosome list" % genome_string, file=sys.stderr)
         sys.exit(1)
     fai = fasta + ".fai"
     fai_csv = csv.reader(open(fai, "rb"), delimiter="\t")
@@ -59,9 +59,9 @@ def infer_fasta_from_bam(bam_file):
         return(None, None)
     for candidate in chr1_fingerprints:
         if chr1_fingerprints[candidate]['name']==chr_name and chr1_fingerprints[candidate]['length']==int(length):
-            print >>sys.stderr, "Inferred genome to be %s" % candidate
+            print("Inferred genome to be %s" % candidate, file=sys.stderr)
             return (candidate, genomes[candidate]['fasta'])
-    print >>sys.stderr, "Chromosome 1 name %s, length %s, doesn't match any standard refs?" % (chr_name, length)
+    print("Chromosome 1 name %s, length %s, doesn't match any standard refs?" % (chr_name, length), file=sys.stderr)
     return (None, None)
 
 def infer_sample_from_bam(bam_file):
@@ -73,14 +73,14 @@ def infer_sample_from_bam(bam_file):
         for tag in tags:
             if tag[0:2]=="SM":
                 sample_dict[tag[3:]]=1
-    if len(sample_dict.keys()) > 1:
-                    print >>sys.stderr, "Mixed sample tags in Read Group header for %, can't infer a single sample name from this bam naively" % bam_file
-    elif len(sample_dict.keys()) == 1:
-        print >>sys.stderr, "Found one sample key for this bam: %s" % sample_dict.keys()[0]
-        return sample_dict.keys()[0]
+    if len(list(sample_dict.keys())) > 1:
+                    print("Mixed sample tags in Read Group header for %, can't infer a single sample name from this bam naively" % bam_file, file=sys.stderr)
+    elif len(list(sample_dict.keys())) == 1:
+        print("Found one sample key for this bam: %s" % list(sample_dict.keys())[0], file=sys.stderr)
+        return list(sample_dict.keys())[0]
     else:
         #we didnt find any RG with SM: at all :(
-        print >>sys.stderr, "No @RG lines with SM: tags found in %s, can't infer sample" % bam_file
+        print("No @RG lines with SM: tags found in %s, can't infer sample" % bam_file, file=sys.stderr)
     return None
 
 def filesafe_string(string):
@@ -97,13 +97,13 @@ def call_cmd(cmd, shell=True, stderr=None, stdout=None, stdin=None):
         stdin=open(stdin, "r")
     try:
         return_code = subprocess.check_call(cmd, shell=shell, stderr=stderr, stdout=stdout, stdin=stdin)
-    except subprocess.CalledProcessError, e:
-        print >>sys.stderr, "Non Zero Exit Code %s from %s" % (e.returncode, cmd)
-        print >>sys.stderr, "Bailing out!"
+    except subprocess.CalledProcessError as e:
+        print("Non Zero Exit Code %s from %s" % (e.returncode, cmd), file=sys.stderr)
+        print("Bailing out!", file=sys.stderr)
         sys.exit(1)
-    except IOError, e:
-        print >>sys.stderr, e
-        print >>sys.stderr, "I/O error({0}): {1}".format(e.errno, e.strerror)
+    except IOError as e:
+        print(e, file=sys.stderr)
+        print("I/O error({0}): {1}".format(e.errno, e.strerror), file=sys.stderr)
         sys.exit(1)
 
 logging_options = [
@@ -131,13 +131,13 @@ def sort_vcf(vcf):
 
     outfile = vcf.replace('.vcf', '.sorted.vcf')
     cmd = [SORTBED_LOCATION, '-i', vcf, '-header']
-    print >> sys.stdout, 'sortBed command: %s'%(' '.join(cmd))
+    print('sortBed command: %s'%(' '.join(cmd)), file=sys.stdout)
     #logger.debug('sortBed command: %s'%(' '.join(cmd)))
     try:
         rv = subprocess.check_call(cmd, stdout=open(outfile,'w'))
         return outfile
-    except subprocess.CalledProcessError, e:
-        print >> sys.stderr, "Non-zero exit code from sortBed! Bailing out."
+    except subprocess.CalledProcessError as e:
+        print("Non-zero exit code from sortBed! Bailing out.", file=sys.stderr)
         #logger.critical("Non-zero exit code from sortBed! Bailing out.")
         sys.exit(1)
 
@@ -149,7 +149,7 @@ def bgzip(vcf):
     outfile = '%s.gz'%(vcf)
     cmd = [BGZIP_LOCATION, '-c', vcf]
     #logger.debug('BGZIP COMMAND: %s'%(' '.join(cmd)))
-    print >> sys.stderr, 'BGZIP COMMAND: %s'%(' '.join(cmd))
+    print('BGZIP COMMAND: %s'%(' '.join(cmd)), file=sys.stderr)
     subprocess.call(cmd, stdout=open(outfile, 'w'))
     return outfile
 
@@ -159,16 +159,16 @@ def tabix_file(vcf_file):
     ''' index a vcf file with tabix for random access'''
     with magic.Magic(flags=magic.MAGIC_MIME_TYPE) as m:
         if(m.id_filename(vcf_file).find('gz') == -1):
-            print >> sys.stderr, 'VCF File needs to be bgzipped for tabix random access. tabix-0.26/bgzip should be compiled for use'
+            print('VCF File needs to be bgzipped for tabix random access. tabix-0.26/bgzip should be compiled for use', file=sys.stderr)
             #logger.critical('VCF File needs to be bgzipped for tabix random access. tabix-0.26/bgzip should be compiled for use')
             sys.exit(1)
     cmd = [TABIX_LOCATION, '-p' , 'vcf', vcf_file]
-    print >> sys.stdout, 'Tabix command: %s'%(' '.join(cmd))
+    print('Tabix command: %s'%(' '.join(cmd)), file=sys.stdout)
     #logger.debug('Tabix command: %s'%(' '.join(cmd)))
     try:
         rv = subprocess.check_call(cmd)
-    except subprocess.CalledProcessError, e:
-        print >> sys.stderr, 'Non-zero exit code from Tabix! Bailing out.'
+    except subprocess.CalledProcessError as e:
+        print('Non-zero exit code from Tabix! Bailing out.', file=sys.stderr)
         #logger.critical('Non-zero exit code from Tabix! Bailing out.')
         sys.exit(1)
 
@@ -207,19 +207,19 @@ def normalize_vcf(vcf_file, ref_fasta, version="default", method='bcf'):
     cmd = ''
     if method == 'vt':
         cmd = [norm_command, 'normalize', '-r', ref_fasta, zipped_file, '-o', output_vcf, '-q', '-n']
-        print >> sys.stdout, 'VT Command: %s'%(' '.join(cmd))
+        print('VT Command: %s'%(' '.join(cmd)), file=sys.stdout)
         #logger.debug('VT Command: %s'%(' '.join(cmd)))
     elif method == 'bcf':
         cmd = [norm_command, 'norm', '-m', '-', '-O', 'b', '-o', output_vcf, zipped_file]
-        print >> sys.stdout, 'bcftools norm Command: %s'%(' '.join(cmd))
+        print('bcftools norm Command: %s'%(' '.join(cmd)), file=sys.stdout)
         #logger.info('bcftools norm Command: %s'%(' '.join(cmd)))
     try:
         rv = subprocess.check_call(cmd)
         fix_contig_tag_in_vcf_by_line(output_vcf)
         #fix_contig_tag_in_vcf(output_vcf)
         return output_vcf
-    except subprocess.CalledProcessError, e:
-        print >> sys.stderr, "Non-zero exit code from normalization! Bailing out."
+    except subprocess.CalledProcessError as e:
+        print("Non-zero exit code from normalization! Bailing out.", file=sys.stderr)
         #logger.critical("Non-zero exit code from normalization! Bailing out.")
         sys.exit(1)
 
