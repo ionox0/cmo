@@ -1,0 +1,31 @@
+#!/opt/common/CentOS_6-dev/python/python-2.7.10/bin/python
+
+import argparse
+
+import cmo
+
+
+# Example Usage:
+#
+# java -jar ${fgbio_jar} --tmp-dir=${scratch_dir} SetMateInformation
+# -i ${output_folder}/sample_with_UMI_sorted.bam
+# -o ${output_folder}/sample_with_UMI_sorted_mateFixed.bam
+
+if __name__ =='__main__':
+    parser = argparse.ArgumentParser(description="Run Fulcrum (SetMateInformation)", add_help=False)
+    fulcrum = cmo.util.programs['fulcrum']['default']
+    java = cmo.util.programs['java']['jdk1.8.0_25']
+
+    parser.add_argument("-td", "--tmp_dir",  action='append', help="", required = True)
+    parser.add_argument("-i", "--input_bam",  action='append', help="", required = True)
+    parser.add_argument("-o", "--output_bam_filename",  action='append', help="", required = True)
+
+    (args, unknowns) = parser.parse_known_args()
+
+    cmd = [java, "-server -Xms8g -Xmx8g -jar", fulcrum]
+    cmd = " ".join(cmd)
+    cmd = "{} --tmp-dir={} {} -i {} -o {}".format(cmd, args.scratch_dir, "SetMateInformation",
+                                                                             args.input_bam, args.sort_order,
+                                                                             args.output_bam_filename)
+
+    cmo.util.call_cmd(cmd, shell=True)

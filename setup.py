@@ -121,7 +121,8 @@ setup(name='cmo',
                  'bin/cmo_fillout',
                  'bin/cmo_file_of_files',
                  'bin/cmo_igv_plot',
-		 'bin/cmo_delly'
+                 'bin/cmo_delly',
+                 'bin/cmo_fulcrm_map_read_names_to_umis'
                  #'bin/cmo_hotspot3d'
                  ],
         zip_safe=False)

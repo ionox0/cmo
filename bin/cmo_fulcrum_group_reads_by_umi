@@ -1,0 +1,37 @@
+#!/opt/common/CentOS_6-dev/python/python-2.7.10/bin/python
+
+import argparse
+
+import cmo
+
+# Example Usage:
+#
+# java -jar ${fgbio_jar} --tmp-dir=${scratch_dir} GroupReadsByUmi
+# -s 'paired'
+# -m 20
+# -f ${output_folder}/Grouped-mapQ20-histogram
+# -i ${output_folder}/sample_with_UMI_sorted_mateFixed.bam
+# -o ${output_folder}/collapsed-sample_with_UMI_sorted_mateFixed_paired_mapQ20.bam
+
+if __name__ =='__main__':
+    parser = argparse.ArgumentParser(description="Run Fulcrum (GroupReadsByUmi)", add_help=False)
+    fulcrum = cmo.util.programs['fulcrum']['default']
+    java = cmo.util.programs['java']['jdk1.8.0_25']
+
+    parser.add_argument("-sd", "--tmp_dir",  action='append', help="", required = True)
+    parser.add_argument("-s", "--something",  action='append', help="", required = True)
+    parser.add_argument("-m", "--something_else",  action='append', help="", required = True)
+    parser.add_argument("-f", "--something_else_else",  action='append', help="", required = True)
+    parser.add_argument("-i", "--input_bam",  action='append', help="", required = True)
+    parser.add_argument("-o", "--output_bam_filename",  action='append', help="", required = True)
+
+    (args, unknowns) = parser.parse_known_args()
+
+    cmd = [java, "-server -Xms8g -Xmx8g -jar", fulcrum]
+    cmd = " ".join(cmd)
+    cmd = "{} --tmp-dir={} {} -s {} -m {} -f {} -i {} -o {}".format(cmd, args.scratch_dir, "GroupReadsByUmi",
+                                                                    args.something, args.something_else,
+                                                                    args.something_else_else, args.input_bam,
+                                                                    args.output_bam_filename)
+
+    cmo.util.call_cmd(cmd, shell=True)

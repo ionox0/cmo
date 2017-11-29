@@ -1,0 +1,37 @@
+#!/opt/common/CentOS_6-dev/python/python-2.7.10/bin/python
+
+import argparse
+
+import cmo
+
+# Example Usage:
+#
+# java -jar ${fgbio_jar} --tmp-dir=${scratch_dir} FilterConsensusReads
+# -i ${output_folder}/duplexConsensusReads_collapsed-sample_with_UMI_sorted_mateFixed_paired_mapQ20.bam
+# -r /ifs/work/bergerm1/pererad1/impact-GRCh37/Homo_sapiens_assembly19.fasta
+# -M=1
+# -N=30
+# -o ${output_folder}/filtered_duplexConsensusReads_collapsed-sample_with_UMI_sorted_mateFixed_paired_mapQ20_1-1.bam
+
+if __name__ =='__main__':
+    parser = argparse.ArgumentParser(description="Run Fulcrum (FilterConsensusReads)", add_help=False)
+    fulcrum = cmo.util.programs['fulcrum']['default']
+    java = cmo.util.programs['java']['jdk1.8.0_25']
+
+    parser.add_argument("-td", "--tmp_dir",  action='append', help="", required = True)
+    parser.add_argument("-i", "--input_bam",  action='append', help="", required = True)
+    parser.add_argument("-r", "--reference_fasta",  action='append', help="", required = True)
+    parser.add_argument("-M", "--something",  action='append', help="", required = True)
+    parser.add_argument("-N", "--something_else",  action='append', help="", required = True)
+    parser.add_argument("-o", "--output_bam_filename",  action='append', help="", required = True)
+
+    (args, unknowns) = parser.parse_known_args()
+
+    cmd = [java, "-server -Xms8g -Xmx8g -jar", fulcrum]
+    cmd = " ".join(cmd)
+    cmd = "{} --tmp-dir={} {} -i {} -r {} -M {} -N {} -o {}".format(cmd, args.scratch_dir, "FilterConsensusReads",
+                                                                    args.input_bam, args.reference_fasta,
+                                                                    args.something, args.something_else,
+                                                                    args.output_bam_filename)
+
+    cmo.util.call_cmd(cmd, shell=True)
