@@ -18,12 +18,12 @@ if __name__ =='__main__':
     fulcrum = cmo.util.programs['fulcrum']['default']
     java = cmo.util.programs['java']['jdk1.8.0_25']
 
-    parser.add_argument("-sd", "--tmp_dir",  action='append', help="", required = True)
-    parser.add_argument("-s", "--something",  action='append', help="", required = True)
-    parser.add_argument("-m", "--something_else",  action='append', help="", required = True)
-    parser.add_argument("-f", "--something_else_else",  action='append', help="", required = True)
-    parser.add_argument("-i", "--input_bam",  action='append', help="", required = True)
-    parser.add_argument("-o", "--output_bam_filename",  action='append', help="", required = True)
+    parser.add_argument("-sd", "--tmp_dir", help="", required = True)
+    parser.add_argument("-s", "--something", help="", required = True)
+    parser.add_argument("-m", "--something_else", help="", required = True)
+    parser.add_argument("-f", "--something_else_else", help="", required = True)
+    parser.add_argument("-i", "--input_bam", help="", required = True)
+    parser.add_argument("-o", "--output_bam_filename", help="", required = True)
 
     (args, unknowns) = parser.parse_known_args()
 

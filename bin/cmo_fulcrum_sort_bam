@@ -17,10 +17,10 @@ if __name__ =='__main__':
     fulcrum = cmo.util.programs['fulcrum']['default']
     java = cmo.util.programs['java']['jdk1.8.0_25']
 
-    parser.add_argument("-td", "--tmp_dir",  action='append', help="", required = True)
-    parser.add_argument("-i", "--input_bam",  action='append', help="", required = True)
-    parser.add_argument("-s", "--sort_order",  action='append', help="", required = True)
-    parser.add_argument("-o", "--output_bam_filename",  action='append', help="", required = True)
+    parser.add_argument("-td", "--tmp_dir", help="", required = True)
+    parser.add_argument("-i", "--input_bam", help="", required = True)
+    parser.add_argument("-s", "--sort_order", help="", required = True)
+    parser.add_argument("-o", "--output_bam_filename", help="", required = True)
 
     (args, unknowns) = parser.parse_known_args()
 
