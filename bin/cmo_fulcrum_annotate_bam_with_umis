@@ -26,6 +26,7 @@ if __name__ =='__main__':
 
     cmd = [java, "-server -Xms8g -Xmx8g -jar", fulcrum]
     cmd = " ".join(cmd)
-    cmd = "{} --tmp-dir={} -f {} -o {}".format(cmd, args.tmp_dir, args.read_names_file, args.output_bam_filename)
+    cmd = "{} --tmp-dir={} AnnotateBamWithUmis -i {} -f {} -o {}".format(cmd, args.tmp_dir, args.input_bam,
+                                                                         args.read_names_file, args.output_bam_filename)
 
     cmo.util.call_cmd(cmd, shell=True)

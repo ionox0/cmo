@@ -24,8 +24,7 @@ if __name__ =='__main__':
 
     cmd = [java, "-server -Xms8g -Xmx8g -jar", fulcrum]
     cmd = " ".join(cmd)
-    cmd = "{} --tmp-dir={} {} -i {} -o {}".format(cmd, args.tmp_dir, "CallDuplexConsensusReads",
-                                                  args.input_bam,
+    cmd = "{} --tmp-dir={} CallDuplexConsensusReads -i {} -o {}".format(cmd, args.tmp_dir, args.input_bam,
                                                   args.output_bam_filename)
 
     cmo.util.call_cmd(cmd, shell=True)
