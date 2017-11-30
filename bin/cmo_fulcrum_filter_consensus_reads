@@ -29,7 +29,7 @@ if __name__ =='__main__':
 
     cmd = [java, "-server -Xms8g -Xmx8g -jar", fulcrum]
     cmd = " ".join(cmd)
-    cmd = "{} --tmp-dir={} FilterConsensusReads -i {} -r {} -M {} -N {} -o {}".format(cmd, args.scratch_dir,
+    cmd = "{} --tmp-dir={} FilterConsensusReads -i {} -r {} -M {} -N {} -o {}".format(cmd, args.tmp_dir,
                                                                     args.input_bam, args.reference_fasta,
                                                                     args.something, args.something_else,
                                                                     args.output_bam_filename)

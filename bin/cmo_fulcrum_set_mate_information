@@ -24,7 +24,7 @@ if __name__ =='__main__':
 
     cmd = [java, "-server -Xms8g -Xmx8g -jar", fulcrum]
     cmd = " ".join(cmd)
-    cmd = "{} --tmp-dir={} SetMateInformation -i {} -o {}".format(cmd, args.scratch_dir, args.input_bam,
+    cmd = "{} --tmp-dir={} SetMateInformation -i {} -o {}".format(cmd, args.tmp_dir, args.input_bam,
                                                                   args.sort_order, args.output_bam_filename)
 
     cmo.util.call_cmd(cmd, shell=True)

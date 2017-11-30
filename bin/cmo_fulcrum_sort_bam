@@ -26,7 +26,7 @@ if __name__ =='__main__':
 
     cmd = [java, "-server -Xms8g -Xmx8g -jar", fulcrum]
     cmd = " ".join(cmd)
-    cmd = "{} --tmp-dir={} SortBam --input={} --sort-order={} --output {}".format(cmd, args.scratch_dir,
+    cmd = "{} --tmp-dir={} SortBam --input={} --sort-order={} --output {}".format(cmd, args.tmp_dir,
                                                                              args.input_bam, args.sort_order,
                                                                              args.output_bam_filename)
 
