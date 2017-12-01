@@ -19,9 +19,9 @@ if __name__ =='__main__':
     java = cmo.util.programs['java']['jdk1.8.0_25']
 
     parser.add_argument("-sd", "--tmp_dir", help="", required = True)
-    parser.add_argument("-s", "--something", help="", required = True)
-    parser.add_argument("-m", "--something_else", help="", required = True)
-    parser.add_argument("-f", "--something_else_else", help="", required = True)
+    parser.add_argument("-s", "--strategy", help="", required = True)
+    parser.add_argument("-m", "--min_mapping_quality", help="", required = True)
+    parser.add_argument("-f", "--tag_family_size_counts_outpu", help="", required = True)
     parser.add_argument("-i", "--input_bam", help="", required = True)
     parser.add_argument("-o", "--output_bam_filename", help="", required = True)
 
@@ -30,8 +30,8 @@ if __name__ =='__main__':
     cmd = [java, "-server -Xms8g -Xmx8g -jar", fulcrum]
     cmd = " ".join(cmd)
     cmd = "{} --tmp-dir={} GroupReadsByUmi -s {} -m {} -f {} -i {} -o {}".format(cmd, args.tmp_dir,
-                                                                    args.something, args.something_else,
-                                                                    args.something_else_else, args.input_bam,
+                                                                    args.strategy, args.min_mapping_quality,
+                                                                    args.tag_family_size_counts_outpu, args.input_bam,
                                                                     args.output_bam_filename)
 
     cmo.util.call_cmd(cmd, shell=True)

@@ -127,7 +127,8 @@ setup(name='cmo',
                  'bin/cmo_fulcrum_filter_consensus_reads',
                  'bin/cmo_fulcrum_group_reads_by_umi',
                  'bin/cmo_fulcrum_set_mate_information',
-                 'bin/cmo_fulcrum_sort_bam'
+                 'bin/cmo_fulcrum_sort_bam',
+                 'bin/cmo_map_umis_to_read_names'
                  #'bin/cmo_hotspot3d'
                  ],
         zip_safe=False)
