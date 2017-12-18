@@ -21,8 +21,8 @@ if __name__ =='__main__':
     parser.add_argument("-td", "--tmp_dir", help="", required = True)
     parser.add_argument("-i", "--input_bam", help="", required = True)
     parser.add_argument("-r", "--reference_fasta", help="", required = True)
-    parser.add_argument("-M", "--something", help="", required = True)
-    parser.add_argument("-N", "--something_else", help="", required = True)
+    parser.add_argument("-M", "--min_reads", help="", required = True)
+    parser.add_argument("-N", "--min_base_quality", help="", required = True)
     parser.add_argument("-o", "--output_bam_filename", help="", required = True)
 
     (args, unknowns) = parser.parse_known_args()
@@ -31,7 +31,7 @@ if __name__ =='__main__':
     cmd = " ".join(cmd)
     cmd = "{} --tmp-dir={} FilterConsensusReads -i {} -r {} -M {} -N {} -o {}".format(cmd, args.tmp_dir,
                                                                     args.input_bam, args.reference_fasta,
-                                                                    args.something, args.something_else,
+                                                                    args.min_reads, args.min_base_quality,
                                                                     args.output_bam_filename)
 
     cmo.util.call_cmd(cmd, shell=True)
