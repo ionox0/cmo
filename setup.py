@@ -122,6 +122,7 @@ setup(name='cmo',
                  'bin/cmo_file_of_files',
                  'bin/cmo_igv_plot',
                  'bin/cmo_delly',
+                 'bin/cmo_process_loop_umi_fastq'
                  'bin/cmo_fulcrum_annotate_bam_with_umis',
                  'bin/cmo_fulcrum_call_duplex_consensus_reads',
                  'bin/cmo_fulcrum_filter_consensus_reads',
