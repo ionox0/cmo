@@ -21,17 +21,17 @@ if __name__ =='__main__':
     parser.add_argument("-sd", "--tmp_dir", help="", required = True)
     parser.add_argument("-s", "--strategy", help="", required = True)
     parser.add_argument("-m", "--min_mapping_quality", help="", required = True)
-    parser.add_argument("-f", "--tag_family_size_counts_outpu", help="", required = True)
+    parser.add_argument("-f", "--tag_family_size_counts_output", help="", required = True)
     parser.add_argument("-i", "--input_bam", help="", required = True)
     parser.add_argument("-o", "--output_bam_filename", help="", required = True)
 
     (args, unknowns) = parser.parse_known_args()
 
-    cmd = [java, "-server -Xms8g -Xmx8g -jar", fulcrum]
+    cmd = [java, "-server -Xms8g -jar", fulcrum] # -Xmx8g
     cmd = " ".join(cmd)
     cmd = "{} --tmp-dir={} GroupReadsByUmi -s {} -m {} -f {} -i {} -o {}".format(cmd, args.tmp_dir,
                                                                     args.strategy, args.min_mapping_quality,
-                                                                    args.tag_family_size_counts_outpu, args.input_bam,
+                                                                    args.tag_family_size_counts_output, args.input_bam,
                                                                     args.output_bam_filename)
 
     cmo.util.call_cmd(cmd, shell=True)
