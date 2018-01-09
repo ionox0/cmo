@@ -16,7 +16,9 @@ import cmo
 if __name__ =='__main__':
     parser = argparse.ArgumentParser(description="Run Fulcrum (GroupReadsByUmi)", add_help=False)
     fulcrum = cmo.util.programs['fulcrum']['default']
-    java = cmo.util.programs['java']['jdk1.8.0_25']
+    # todo - bypassing singularity for now
+    # java = cmo.util.programs['java']['jdk1.8.0_25']
+    java = '/opt/common/CentOS_6/java/jdk1.8.0_25/bin/java'
 
     parser.add_argument("-sd", "--tmp_dir", help="", required = True)
     parser.add_argument("-s", "--strategy", help="", required = True)
@@ -27,7 +29,7 @@ if __name__ =='__main__':
 
     (args, unknowns) = parser.parse_known_args()
 
-    cmd = [java, "-server -Xms8g -jar", fulcrum] # -Xmx8g
+    cmd = [java, "-server -jar", fulcrum] # -Xms8g -Xmx30g
     cmd = " ".join(cmd)
     cmd = "{} --tmp-dir={} GroupReadsByUmi -s {} -m {} -f {} -i {} -o {}".format(cmd, args.tmp_dir,
                                                                     args.strategy, args.min_mapping_quality,

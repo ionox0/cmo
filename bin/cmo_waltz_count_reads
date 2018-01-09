@@ -1,0 +1,32 @@
+#!/opt/common/CentOS_6-dev/python/python-2.7.10/bin/python
+
+import argparse
+
+import cmo
+
+
+# Example Waltz CountReads usage
+#
+# $java -server -Xms4g -Xmx4g -cp ~/software/Waltz.jar org.mskcc.juber.waltz.countreads.CountReads $bamFile $coverageThreshold $geneList $bedFile
+
+
+if __name__ =='__main__':
+    parser = argparse.ArgumentParser(description="Run Waltz (CountReads)", add_help=False)
+    waltz = cmo.util.programs['waltz']['default']
+    # todo - bypassing singularity for now
+    # java = cmo.util.programs['java']['jdk1.8.0_25']
+    java = '/opt/common/CentOS_6/java/jdk1.8.0_25/bin/java'
+
+    parser.add_argument("-i", "--input_bam", help="", required = True)
+    parser.add_argument("-c", "--coverage_threshold", help="", required = True)
+    parser.add_argument("-g", "--gene_list", help="", required = True)
+    parser.add_argument("-b", "--bed_file", help="", required = True)
+
+    (args, unknowns) = parser.parse_known_args()
+
+    cmd = [java, "-server -Xms256m -Xmx30g -cp", waltz] # -Xmx8g
+    cmd = " ".join(cmd)
+    cmd = "{} org.mskcc.juber.waltz.countreads.CountReads {} {} {} {}".format(cmd, args.input_bam, args.coverage_threshold,
+                                                                           args.gene_list, args.bed_file)
+
+    cmo.util.call_cmd(cmd, shell=True)

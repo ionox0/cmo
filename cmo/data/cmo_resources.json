@@ -303,7 +303,12 @@
         },
         "fulcrum": {
             "0.2.0": "/home/johnsoni/software/fulcrum/fgbio-0.2.0.jar",
-            "default": "/home/johnsoni/software/fulcrum/fgbio-0.2.0.jar"
+            "0.3.0": "/home/johnsoni/software/fulcrum/fgbio-0.3.0.jar",
+            "default": "/home/johnsoni/software/fulcrum/fgbio-0.3.0.jar"
+        },
+        "waltz": {
+            "0.0.0": "/home/johnsoni/software/Waltz.jar",
+            "default": "/home/johnsoni/software/Waltz.jar"
         }
     },
 

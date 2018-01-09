@@ -129,7 +129,11 @@ setup(name='cmo',
                  'bin/cmo_fulcrum_group_reads_by_umi',
                  'bin/cmo_fulcrum_set_mate_information',
                  'bin/cmo_fulcrum_sort_bam',
-                 'bin/innovation_map_read_names_to_umis'
+                 'bin/innovation_map_read_names_to_umis',
+                 'bin/cmo_waltz_count_reads',
+                 'bin/cmo_waltz_pileup_metrics',
+                 'bin/innovation_aggregate_bam_metrics',
+                 'bin/innovation_merge_directories'
                  #'bin/cmo_hotspot3d'
                  ],
         zip_safe=False)

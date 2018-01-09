@@ -1,0 +1,35 @@
+#!/opt/common/CentOS_6-dev/python/python-2.7.10/bin/python
+
+import argparse
+
+import cmo
+
+
+# Example Waltz PileupMetrics usage:
+#
+# $java -server -Xms4g -Xmx4g -cp ~/software/Waltz.jar org.mskcc.juber.waltz.Waltz PileupMetrics 20 $bamFile $referenceFasta $bedFile
+
+
+if __name__ =='__main__':
+    parser = argparse.ArgumentParser(description="Run Waltz (PileupMetrics)", add_help=False)
+    waltz = cmo.util.programs['waltz']['default']
+    # todo - bypassing singularity for now
+    # java = cmo.util.programs['java']['jdk1.8.0_25']
+    java = '/opt/common/CentOS_6/java/jdk1.8.0_25/bin/java'
+
+    parser.add_argument("-m", "--min_mapping_quality", help="", required = True)
+    parser.add_argument("-i", "--input_bam", help="", required = True)
+    parser.add_argument("-f", "--reference_fasta", help="", required = True)
+    parser.add_argument("-b", "--bed_file", help="", required = True)
+
+    (args, unknowns) = parser.parse_known_args()
+
+    cmd = [java, "-server -Xms256m -Xmx30g -cp", waltz] # -Xmx8g
+    cmd = " ".join(cmd)
+    cmd = "{} org.mskcc.juber.waltz.Waltz PileupMetrics {} {} {} {}".format(cmd,
+                                                                            args.min_mapping_quality,
+                                                                            args.input_bam,
+                                                                            args.reference_fasta,
+                                                                            args.bed_file)
+
+    cmo.util.call_cmd(cmd, shell=True)

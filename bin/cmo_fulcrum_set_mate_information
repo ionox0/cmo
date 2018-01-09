@@ -14,7 +14,9 @@ import cmo
 if __name__ =='__main__':
     parser = argparse.ArgumentParser(description="Run Fulcrum (SetMateInformation)", add_help=False)
     fulcrum = cmo.util.programs['fulcrum']['default']
-    java = cmo.util.programs['java']['jdk1.8.0_25']
+    # todo - bypassing singularity for now
+    # java = cmo.util.programs['java']['jdk1.8.0_25']
+    java = '/opt/common/CentOS_6/java/jdk1.8.0_25/bin/java'
 
     parser.add_argument("-td", "--tmp_dir", help="", required = True)
     parser.add_argument("-i", "--input_bam", help="", required = True)
@@ -22,7 +24,7 @@ if __name__ =='__main__':
 
     (args, unknowns) = parser.parse_known_args()
 
-    cmd = [java, "-server -Xms8g -Xmx8g -jar", fulcrum]
+    cmd = [java, "-server -jar", fulcrum] # -Xms8g -Xmx30g
     cmd = " ".join(cmd)
     cmd = "{} --tmp-dir={} SetMateInformation -i {} -o {}".format(cmd, args.tmp_dir, args.input_bam,
                                                                   args.output_bam_filename)
