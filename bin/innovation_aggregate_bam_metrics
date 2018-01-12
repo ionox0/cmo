@@ -1,12 +1,13 @@
 import os
 import sys
+import ntpath
 from shutil import copyfile
 
 import cmo
 
 
 INTERVALS_COVERAGE_SUM_FILENAME = 'intervals_coverage_sum.txt'
-EPSILON = 10e-6
+EPSILON = 10e-10
 
 # Example Waltz CountReads output files:
 #
@@ -21,33 +22,37 @@ EPSILON = 10e-6
 # MSK-L-007-bc-IGO-05500-DY-5_bc217_5500-DY-1_L000_mrg_cl_aln_srt_MD_IR_FX_BR-intervals.txt
 # MSK-L-007-bc-IGO-05500-DY-5_bc217_5500-DY-1_L000_mrg_cl_aln_srt_MD_IR_FX_BR-intervals-without-duplicates.txt
 
-# todo - use Pandas instead of looping through files
 
-waltz_dir = sys.argv[1]
-
-
-# Copy all waltz output to here as well
-# todo - unnecessary
-
-files = (file for file in os.listdir(waltz_dir)
-         if os.path.isfile(os.path.join(waltz_dir, file)))
-
+# todo - not clean, upgrade to Toil-0.12 and use Directory Input:
+files = sys.argv[1:]
+# Copy all waltz output to current dir
 for input_file in files:
-    copyfile(waltz_dir + '/' + input_file, './' + input_file)
+    copyfile(input_file, ntpath.basename(input_file))
 
+
+# Define headers for metrics files:
+READ_COUNTS_FILE_HEADER = "Bam\tID\tTotalReads\tUnmappedReads\tTotalMapped\tUniqueMapped\tDuplicateFraction\t"
+READ_COUNTS_FILE_HEADER += "TotalOnTarget\tUniqueOnTarget\tTotalOnTargetFraction\tUniqueOnTargetFraction\n"
+
+FRAGMENT_SIZES_FILE_HEADER = "FragmentSize\tTotalFrequency\tUniqueFrequency\tSample\n"
+WALTZ_COVERAGE_FILE_HEADER = "Sample\tTotalCoverage\tUniqueCoverage\n"
+INTERVALS_COVERAGE_SUM_FILE_HEADER = "Chr\tStart\tEnd\tIntervalName\tLength\tGC\tCoverage\tCoverageWithoutDuplicates\n"
+
+
+# todo - use Pandas instead of looping through files
 
 def process_read_counts_files():
     """
     read-counts.txt
+
+    Concatenate .read-counts files for each Bam into one file
     """
-    cmd = 'cat ' + waltz_dir + '/*.read-counts > read-counts.txt'
+    cmd = 'cat ' + '.' + '/*.read-counts > read-counts.txt'
     cmo.util.call_cmd(cmd, shell=True)
 
     read_counts = open('read-counts.txt')
     temp = open('t', 'w')
-    header_string = "Bam\tID\tTotalReads\tUnmappedReads\tTotalMapped\tUniqueMapped\tDuplicateFraction\t"
-    header_string += "TotalOnTarget\tUniqueOnTarget\tTotalOnTargetFraction\tUniqueOnTargetFraction\n"
-    temp.write(header_string)
+    temp.write(READ_COUNTS_FILE_HEADER)
 
     for line in read_counts:
         line_split = line.strip().split('\t')
@@ -64,13 +69,12 @@ def process_fragment_sizes_files():
     fragment-sizes.txt
     """
     fragment_sizes_file = open('fragment-sizes.txt', 'w')
-    header_string_2 = "FragmentSize\tTotalFrequency\tUniqueFrequency\tSample\n"
-    fragment_sizes_file.write(header_string_2)
+    fragment_sizes_file.write(FRAGMENT_SIZES_FILE_HEADER)
 
-    input_files = [f for f in os.listdir(waltz_dir) if '.fragment-sizes' in f]
+    input_files = [f for f in os.listdir('.') if '.fragment-sizes' in f]
     for f in input_files:
         sample = f.replace('.bam.fragment-sizes', '')
-        file_path = waltz_dir + '/' + f
+        file_path = '.' + '/' + f
 
         with open(file_path) as input_file:
             for line in input_file:
@@ -82,15 +86,14 @@ def create_waltz_coverage_file():
     waltz-coverage.txt
     """
     waltz_coverage_file = open('waltz-coverage.txt', 'w')
-    header_string_3 = "Sample\tTotalCoverage\tUniqueCoverage\n"
-    waltz_coverage_file.write(header_string_3)
+    waltz_coverage_file.write(WALTZ_COVERAGE_FILE_HEADER)
 
-    input_files = [f for f in os.listdir(waltz_dir) if '-intervals.txt' in f]
+    input_files = [f for f in os.listdir('.') if '-intervals.txt' in f]
 
     for f in input_files:
         sample = f.replace('-intervals.txt', '')
 
-        file_path = waltz_dir + '/' + f
+        file_path = '.' + '/' + f
 
         # Total Coverage = the sum of (coverage * fragment length) over all intervals
         with open(file_path) as input_file:
@@ -101,7 +104,6 @@ def create_waltz_coverage_file():
                 count = count + int(line_split[4])
                 total_coverage = total_coverage + int(line_split[4]) * float(line_split[6])
 
-            print(total_coverage, count, total_coverage / count)
             total_coverage = total_coverage / count
 
         # Unique Coverage = the sum of (coverage * fragment length) over all unique intervals
@@ -114,7 +116,6 @@ def create_waltz_coverage_file():
                 count = count + int(line_split[4])
                 unique_coverage = unique_coverage + int(line_split[4]) * float(line_split[6])
 
-            print(unique_coverage, count, unique_coverage / count)
             unique_coverage = unique_coverage / count
 
         waltz_coverage_file.write(sample + '\t' + str(total_coverage) + '\t' + str(unique_coverage) + '\n')
@@ -129,10 +130,10 @@ def create_sum_of_coverage_temp_file():
     coverage = {}
     gc = {}
 
-    input_files = [f for f in os.listdir(waltz_dir) if '-intervals.txt' in f]
+    input_files = [f for f in os.listdir('.') if '-intervals.txt' in f]
     for f in input_files:
 
-        file_path = waltz_dir + '/' + f
+        file_path = '.' + '/' + f
 
         with open(file_path) as input_file:
             for line in input_file:
@@ -157,11 +158,11 @@ def create_temp_6_file():
     """
     temp_6 = open('t6', 'w')
 
-    input_files = [f for f in os.listdir(waltz_dir) if '-intervals-without-duplicates.txt' in f]
+    input_files = [f for f in os.listdir('.') if '-intervals-without-duplicates.txt' in f]
 
     coverage = {}
     for f in input_files:
-        file_path = waltz_dir + '/' + f
+        file_path = '.' + '/' + f
 
         with open(file_path) as input_file:
             for line in input_file:
@@ -184,8 +185,7 @@ def create_intervals_coverage_sum_file():
     intervals-coverage-sum.txt
     """
     intervals_coverage_sum_file = open(INTERVALS_COVERAGE_SUM_FILENAME, 'w')
-    intervals_coverage_sum_header = "Chr\tStart\tEnd\tIntervalName\tLength\tGC\tCoverage\tCoverageWithoutDuplicates\n"
-    intervals_coverage_sum_file.write(intervals_coverage_sum_header)
+    intervals_coverage_sum_file.write(INTERVALS_COVERAGE_SUM_FILE_HEADER)
 
     with open('t5', 'rU') as t5:
         with open('t6', 'rU') as t6:
@@ -213,11 +213,11 @@ def create_sample_per_interval_coverage_files():
     temp_5 = open('t5', 'w')
     temp_6 = open('t6', 'w')
 
-    input_files = [f for f in os.listdir(waltz_dir) if '-intervals.txt' in f]
+    input_files = [f for f in os.listdir('.') if '-intervals.txt' in f]
 
     for f in input_files:
 
-        file_path = waltz_dir + '/' + f
+        file_path = '.' + '/' + f
 
         with open(file_path) as input_file:
 
@@ -231,11 +231,11 @@ def create_sample_per_interval_coverage_files():
                 temp_5.write(intervals_line_output + '\n')
 
 
-    input_files = [f for f in os.listdir(waltz_dir) if '-intervals-without-duplicates.txt' in f]
+    input_files = [f for f in os.listdir('.') if '-intervals-without-duplicates.txt' in f]
 
     for f in input_files:
 
-        file_path = waltz_dir + '/' + f
+        file_path = '.' + '/' + f
 
         with open(file_path) as input_file:
 
@@ -264,10 +264,10 @@ def make_normalized_coverage_files():
     t7.write("Interval\tGene\tSample\tTotalCoverage\n")
     t8.write("Interval\tGene\tSample\tUniqueCoverage\n")
 
-    input_files = [f for f in os.listdir(waltz_dir) if '-intervals.txt' in f]
+    input_files = [f for f in os.listdir('.') if '-intervals.txt' in f]
 
     for sample_intervals_filename in input_files:
-        file_path = waltz_dir + '/' + sample_intervals_filename
+        file_path = '.' + '/' + sample_intervals_filename
 
         sample = sample_intervals_filename.replace('-intervals.txt', '')
         sample = sample.split('_bc')[0]

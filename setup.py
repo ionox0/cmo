@@ -132,8 +132,7 @@ setup(name='cmo',
                  'bin/innovation_map_read_names_to_umis',
                  'bin/cmo_waltz_count_reads',
                  'bin/cmo_waltz_pileup_metrics',
-                 'bin/innovation_aggregate_bam_metrics',
-                 'bin/innovation_merge_directories'
+                 'bin/innovation_aggregate_bam_metrics'
                  #'bin/cmo_hotspot3d'
                  ],
         zip_safe=False)
